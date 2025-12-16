@@ -1,0 +1,150 @@
+name: Community Release
+
+permissions:
+  contents: write
+  discussions: write
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v0.18.2)'
+        required: true
+        type: string
+      pre_release:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  RELEASE: true
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine release version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # Extract version from tag (remove 'v' prefix)
+            VERSION="${GITHUB_REF#refs/tags/v}"
+            echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+            echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            # Use manual input
+            TAG="${{ github.event.inputs.tag }}"
+            VERSION="${TAG#v}"
+            echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+            echo "TAG=${TAG}" >> $GITHUB_OUTPUT
+          fi
+          echo "Release version: ${VERSION}"
+          echo "Release tag: ${TAG}"
+
+      - name: Check if release already exists
+        id: release_check
+        continue-on-error: true
+        run: |
+          gh release view ${{ steps.version.outputs.TAG }} > /dev/null 2>&1
+
+      - name: Exit if release exists
+        if: steps.release_check.outcome == 'success'
+        run: |
+          echo "Release ${{ steps.version.outputs.TAG }} already exists"
+          exit 0
+
+      - name: Download artifacts from dev release
+        if: steps.release_check.outcome == 'failure'
+        run: |
+          echo "Downloading artifacts from dev release..."
+          gh release download dev --skip-existing || {
+            echo "Warning: Could not download all artifacts from dev release"
+            echo "Available releases:"
+            gh release list --limit 5
+          }
+
+      - name: List downloaded artifacts
+        if: steps.release_check.outcome == 'failure'
+        run: |
+          echo "Downloaded artifacts:"
+          ls -lh *.zip *.tgz 2>/dev/null || echo "No zip or tgz files found"
+
+      - name: Build release notes
+        if: steps.release_check.outcome == 'failure'
+        run: |
+          rm -f /tmp/release_notes
+          touch /tmp/release_notes
+          echo "# Release Notes" >> /tmp/release_notes
+          echo "" >> /tmp/release_notes
+
+          # Extract release notes from CHANGELOG.md
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          if grep -q "## Platform Version ${VERSION}" CHANGELOG.md; then
+            cat CHANGELOG.md | sed -e '/./{H;$!d;}' -e "x;/##\ Platform\ Version\ ${VERSION}/"'!d;' >> /tmp/release_notes
+          else
+            echo "## Platform Version ${VERSION}" >> /tmp/release_notes
+            echo "" >> /tmp/release_notes
+            echo "No changelog entries found for this version." >> /tmp/release_notes
+          fi
+
+          # Replace UNRELEASED with current date
+          export TZ=":America/Los_Angeles"
+          sed -i "s/UNRELEASED/$(date +%F)/" /tmp/release_notes
+
+          echo "Release notes:"
+          cat /tmp/release_notes
+
+      - name: Create GitHub Release
+        if: steps.release_check.outcome == 'failure'
+        run: |
+          PRE_RELEASE_FLAG=""
+          if [ "${{ github.event.inputs.pre_release }}" = "true" ]; then
+            PRE_RELEASE_FLAG="--prerelease"
+          fi
+
+          # Create array of artifacts to upload
+          ARTIFACTS=$(ls *.zip *.tgz 2>/dev/null || true)
+
+          # Add install.sh to the release
+          ARTIFACTS="${ARTIFACTS} install.sh"
+
+          echo "Creating release ${{ steps.version.outputs.TAG }}..."
+          gh release create ${{ steps.version.outputs.TAG }} \
+            ${PRE_RELEASE_FLAG} \
+            --title "Fluvio ${{ steps.version.outputs.TAG }}" \
+            --notes-file /tmp/release_notes \
+            ${ARTIFACTS}
+
+      - name: Verify release
+        if: steps.release_check.outcome == 'failure'
+        run: |
+          echo "Verifying release..."
+          gh release view ${{ steps.version.outputs.TAG }}
+
+          echo ""
+          echo "Release created successfully!"
+          echo "URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.TAG }}"
+
+      - name: Post release instructions
+        if: steps.release_check.outcome == 'failure'
+        run: |
+          echo ""
+          echo "📦 Release ${{ steps.version.outputs.TAG }} created successfully!"
+          echo ""
+          echo "Users can now install Fluvio using:"
+          echo "  curl -fsS https://raw.githubusercontent.com/${{ github.repository }}/master/install.sh | VERSION=${{ steps.version.outputs.VERSION }} bash"
+          echo ""
+          echo "Or install the latest version:"
+          echo "  curl -fsS https://raw.githubusercontent.com/${{ github.repository }}/master/install.sh | bash"
