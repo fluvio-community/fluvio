@@ -216,9 +216,15 @@ impl TryFrom<Batch> for Batch<RawRecords> {
         let records = RawRecords(compressed_records);
         let schema_id = f.schema_id();
 
+        let schema_len = if f.header.has_schema() {
+            size_of::<SchemaId>() as i32
+        } else {
+            0
+        };
+
         Ok(Batch {
             base_offset: f.base_offset,
-            batch_len: compressed_records_len,
+            batch_len: BATCH_HEADER_SIZE as i32 + compressed_records_len + schema_len,
             header: f.header,
             schema_id,
             records,
@@ -865,7 +871,7 @@ mod test {
         let batch_raw_records: Batch<RawRecords> = Batch::try_from(batch).unwrap();
         assert_eq!(
             batch_raw_records.batch_len(),
-            mem_records.write_size(0) as i32
+            (BATCH_HEADER_SIZE + mem_records.write_size(0)) as i32
         );
 
         // Verify batch len is preserved during conversion

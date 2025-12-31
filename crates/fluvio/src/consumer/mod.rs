@@ -342,7 +342,20 @@ where
                         .records
                         .batches
                         .into_iter()
-                        .map(move |raw_batch| {
+                        .filter_map(move |raw_batch| {
+                            // A StreamFetchResponse may contain a trailing batch that was only
+                            // partially transmitted/decoded. `validate_decoding()` detects this by
+                            // comparing the declared batch length against the decoded bytes.
+                            if !raw_batch.validate_decoding() {
+                                tracing::debug!(
+                                    base_offset = raw_batch.base_offset,
+                                    batch_len = raw_batch.batch_len(),
+                                    records_len = raw_batch.records_len(),
+                                    "skipping invalid (partially decoded) batch"
+                                );
+                                return None;
+                            }
+
                             inner_metrics
                                 .consumer()
                                 .add_records(raw_batch.records_len() as u64);
@@ -351,13 +364,13 @@ where
                                 .add_bytes(raw_batch.batch_len() as u64);
 
                             let batch: Result<Batch, _> = raw_batch.try_into();
-                            match batch {
+                            Some(match batch {
                                 Ok(batch) => Ok(batch),
                                 Err(err) => {
                                     tracing::error!("{err:?}");
                                     Err(ErrorCode::Other(err.to_string()))
                                 }
-                            }
+                            })
                         });
                 let error = {
                     let code = response.partition.error_code;
