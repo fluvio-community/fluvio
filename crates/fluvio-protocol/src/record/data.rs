@@ -281,7 +281,10 @@ impl<R: BatchRecords> RecordSet<R> {
     /// this is next offset to be fetched
     pub fn last_offset(&self) -> Option<Offset> {
         self.batches
-            .last()
+            .iter()
+            .rev()
+            // find last valid batch
+            .find(|batch| batch.validate_decoding())
             .map(|batch| batch.computed_last_offset())
     }
 

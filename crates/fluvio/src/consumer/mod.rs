@@ -352,7 +352,15 @@ where
 
                             let batch: Result<Batch, _> = raw_batch.try_into();
                             match batch {
-                                Ok(batch) => Ok(batch),
+                                Ok(batch) => {
+                                    if batch.records_len() == batch.records().len() {
+                                        Ok(batch)
+                                    } else {
+                                        Err(ErrorCode::Other(
+                                            "Mismatch in decoded batch record length".to_string(),
+                                        ))
+                                    }
+                                }
                                 Err(err) => {
                                     tracing::error!("{err:?}");
                                     Err(ErrorCode::Other(err.to_string()))
