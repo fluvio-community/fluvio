@@ -370,12 +370,12 @@ jobs:
       - name: Build Docker image
         run: k8-util/docker/build.sh ${{ matrix.rust-target }} ${{ github.sha }} "$(pwd)/fluvio-run"
       - name: Export Docker Image to tarball
-        run: docker image save infinyon/fluvio:${{ github.sha }}-${{ matrix.rust-target }} --output /tmp/infinyon-fluvio-${{ matrix.rust-target }}.tar
+        run: docker image save fluvio-community/fluvio:${{ github.sha }}-${{ matrix.rust-target }} --output /tmp/fluvio-${{ matrix.rust-target }}.tar
       - name: Upload tarball as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: infinyon-fluvio-${{ matrix.rust-target }}.tar
-          path: /tmp/infinyon-fluvio-${{ matrix.rust-target }}.tar
+          name: fluvio-${{ matrix.rust-target }}.tar
+          path: /tmp/fluvio-${{ matrix.rust-target }}.tar
           retention-days: 1
 
 
@@ -393,34 +393,40 @@ jobs:
       - name: Download x86_64-unknown-linux-musl Docker Image as Artifact
         uses: actions/download-artifact@v4
         with:
-          name: infinyon-fluvio-x86_64-unknown-linux-musl.tar
+          name: fluvio-x86_64-unknown-linux-musl.tar
           path: /tmp
       - name: Download aarch64-unknown-linux-musl Docker Image as Artifact
         uses: actions/download-artifact@v4
         with:
-          name: infinyon-fluvio-aarch64-unknown-linux-musl.tar
+          name: fluvio-aarch64-unknown-linux-musl.tar
           path: /tmp
 
-        # Load image infinyon/fluvio:SHA-ARCH
+        # Load image fluvio-community/fluvio:SHA-ARCH
       - name: Load Fluvio Docker Image
         run: |
           ls -la /tmp
-          docker image load --input /tmp/infinyon-fluvio-x86_64-unknown-linux-musl.tar
-          docker image load --input /tmp/infinyon-fluvio-aarch64-unknown-linux-musl.tar
+          docker image load --input /tmp/fluvio-x86_64-unknown-linux-musl.tar
+          docker image load --input /tmp/fluvio-aarch64-unknown-linux-musl.tar
           docker image ls -a
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish Fluvio Docker images
         run: |
           export TAG="$(cat VERSION)-${{ github.sha }}"
-          docker login --username=${{ secrets.DOCKER_USERNAME }} --password=${{ secrets.DOCKER_PASSWORD }}
-          docker tag "infinyon/fluvio:${{ github.sha }}-x86_64-unknown-linux-musl" "docker.io/infinyon/fluvio:${TAG}-amd64"
-          docker tag "infinyon/fluvio:${{ github.sha }}-aarch64-unknown-linux-musl" "docker.io/infinyon/fluvio:${TAG}-arm64v8"
-          docker push "docker.io/infinyon/fluvio:${TAG}-amd64"
-          docker push "docker.io/infinyon/fluvio:${TAG}-arm64v8"
-          docker manifest create "docker.io/infinyon/fluvio:${TAG}" \
-            "docker.io/infinyon/fluvio:${TAG}-amd64" \
-            "docker.io/infinyon/fluvio:${TAG}-arm64v8"
-          docker manifest push "docker.io/infinyon/fluvio:${TAG}"
+          docker tag "fluvio-community/fluvio:${{ github.sha }}-x86_64-unknown-linux-musl" "ghcr.io/fluvio-community/fluvio:${TAG}-amd64"
+          docker tag "fluvio-community/fluvio:${{ github.sha }}-aarch64-unknown-linux-musl" "ghcr.io/fluvio-community/fluvio:${TAG}-arm64v8"
+          docker push "ghcr.io/fluvio-community/fluvio:${TAG}-amd64"
+          docker push "ghcr.io/fluvio-community/fluvio:${TAG}-arm64v8"
+          docker manifest create "ghcr.io/fluvio-community/fluvio:${TAG}" \
+            "ghcr.io/fluvio-community/fluvio:${TAG}-amd64" \
+            "ghcr.io/fluvio-community/fluvio:${TAG}-arm64v8"
+          docker manifest push "ghcr.io/fluvio-community/fluvio:${TAG}"
 
   # When all required jobs pass, bump the `dev` GH prerelease to this commit
   bump_github_release:
@@ -435,13 +441,13 @@ jobs:
       #- name: Login GH CLI
       #  run: gh auth login --with-token < <(echo ${{ secrets.GITHUB_TOKEN }})
       - name: Delete old release
-        run: gh release delete -R infinyon/fluvio dev -y || true
+        run: gh release delete -R fluvio-community/fluvio dev -y || true
       - name: Bump dev tag
         run: |
           git tag -f dev
           git push -f origin dev
       - name: Create new release
-        run: gh release create -R infinyon/fluvio dev -p --notes "Published artifacts from the latest build"
+        run: gh release create -R fluvio-community/fluvio dev -p --notes "Published artifacts from the latest build"
 
   # Upload the build artifacts to the `dev` GH release, overwriting old artifacts
   publish_github_helm_pkg:
@@ -458,8 +464,8 @@ jobs:
         run: make helm_pkg
       - name: Publish artifact
         run: |
-          gh release upload -R infinyon/fluvio --clobber dev k8-util/helm/pkg_app/*.*
-          gh release upload -R infinyon/fluvio --clobber dev k8-util/helm/pkg_sys/*.*
+          gh release upload -R fluvio-community/fluvio --clobber dev k8-util/helm/pkg_app/*.*
+          gh release upload -R fluvio-community/fluvio --clobber dev k8-util/helm/pkg_sys/*.*
 
   publish_github_binaries:
     name: Publish to GitHub Releases dev (${{ matrix.artifact }}-${{ matrix.rust-target }})
@@ -522,7 +528,7 @@ jobs:
           ls -la
           echo "${{ matrix.rust-target }}" > .target
           zip "${{ matrix.artifact }}-${{ matrix.rust-target }}.zip" "${{ matrix.artifact }}" .target
-          gh release upload -R infinyon/fluvio --clobber dev "${{ matrix.artifact }}-${{ matrix.rust-target }}.zip"
+          gh release upload -R fluvio-community/fluvio --clobber dev "${{ matrix.artifact }}-${{ matrix.rust-target }}.zip"
 
   # Job that follows the success of all required jobs in this workflow.
   done:

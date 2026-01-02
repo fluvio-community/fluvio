@@ -61,13 +61,13 @@ jobs:
         id: version_step
         run: |
           if [[ -z "${{ github.event.inputs.commit }}" ]]; then
-            export GITHUB_VERSION=$(curl -fsS https://raw.githubusercontent.com/infinyon/fluvio/${{ github.sha }}/VERSION)
+            export GITHUB_VERSION=$(curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/${{ github.sha }}/VERSION)
             echo "VERSION=${GITHUB_VERSION}" | tee -a $GITHUB_ENV
             echo "VERSION=${GITHUB_VERSION}" >> $GITHUB_OUTPUT
             echo "GIT_SHA=${{ github.sha }}" | tee -a $GITHUB_ENV
             echo "GIT_SHA=${{ github.sha }}" >> $GITHUB_OUTPUT
           else
-            export GITHUB_VERSION=$(curl -fsS https://raw.githubusercontent.com/infinyon/fluvio/${{ github.event.inputs.commit }}/VERSION)
+            export GITHUB_VERSION=$(curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/${{ github.event.inputs.commit }}/VERSION)
             echo "VERSION=${GITHUB_VERSION}" | tee -a $GITHUB_ENV
             echo "VERSION=${GITHUB_VERSION}" >> $GITHUB_OUTPUT
             echo "GIT_SHA=${{ github.event.inputs.commit }}" | tee -a $GITHUB_ENV
@@ -76,7 +76,7 @@ jobs:
       - name: Set Installer URL
         id: installer_step
         run: |
-          echo "INSTALLER_URL=https://raw.githubusercontent.com/infinyon/fluvio/${{ steps.version_step.outputs.GIT_SHA }}/install.sh" >> $GITHUB_OUTPUT
+          echo "INSTALLER_URL=https://raw.githubusercontent.com/fluvio-community/fluvio/${{ steps.version_step.outputs.GIT_SHA }}/install.sh" >> $GITHUB_OUTPUT
 
       - name: Slack Notification
         uses: 8398a7/action-slack@v3
@@ -87,23 +87,6 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           MATRIX_CONTEXT: ${{ toJson(matrix) }}
-
-  release_installer:
-    name: Release Fluvio Installer
-    needs: [setup_job]
-    runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.ORG_AWS_PKG_USER_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.ORG_AWS_PKG_USER_SECRET_KEY }}
-      AWS_DEFAULT_REGION: us-west-2
-      TARGET_SHA: ${{ needs.setup_job.outputs.TARGET_SHA }}
-      INSTALLER_URL: ${{ needs.setup_job.outputs.INSTALLER_URL }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download install.sh
-        run: curl -sSO $INSTALLER_URL
-      - name: Push install.sh to packages S3 bucket
-        run: make update-public-installer-script-s3
 
   # Check for Github Release
   release_github:
@@ -159,13 +142,19 @@ jobs:
       TARGET_SHA: ${{ needs.setup_job.outputs.TARGET_SHA }}
     steps:
       - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Attempt to pull image tag in docker registry
         id: docker_check
         continue-on-error: true
         env:
           DOCKER_IMAGE_TAG: ${{ env.VERSION }}
         run: |
-          make docker-hub-check-image-exists
+          make docker-check-image-exists
 
       # if the check fails, then continue
 

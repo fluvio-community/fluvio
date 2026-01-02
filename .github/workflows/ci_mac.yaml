@@ -282,12 +282,12 @@ jobs:
       - name: Build Docker image
         run: k8-util/docker/build.sh ${{ matrix.rust-target }} ${{ github.sha }} "$(pwd)/fluvio-run"
       - name: Export Docker Image to tarball
-        run: docker image save infinyon/fluvio:${{ github.sha }} --output /tmp/infinyon-fluvio-${{ matrix.rust-target }}.tar
+        run: docker image save fluvio-community/fluvio:${{ github.sha }} --output /tmp/fluvio-${{ matrix.rust-target }}.tar
       - name: Upload tarball as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: infinyon-fluvio-${{ matrix.rust-target }}.tar
-          path: /tmp/infinyon-fluvio-${{ matrix.rust-target }}.tar
+          name: fluvio-${{ matrix.rust-target }}.tar
+          path: /tmp/fluvio-${{ matrix.rust-target }}.tar
 
   k8_cluster_test:
     name: Kubernetes cluster test run (${{ matrix.run }}) k8 (${{ matrix.k8 }})
@@ -324,7 +324,7 @@ jobs:
       - name: Download Docker Image as Artifact
         uses: actions/download-artifact@v4
         with:
-          name: infinyon-fluvio-${{ matrix.k8-target }}.tar
+          name: fluvio-${{ matrix.k8-target }}.tar
           path: /tmp
 
       - name: Set up Fluvio binaries
@@ -341,8 +341,8 @@ jobs:
         if: ${{ false }}
         run: |
           ls -la /tmp
-          docker image load --input /tmp/infinyon-fluvio-${{ matrix.k8-target }}.tar
-          docker image tag infinyon/fluvio:${{ github.sha }}-${{ matrix.k8-target }} infinyon/fluvio:${{ github.sha }}
+          docker image load --input /tmp/fluvio-${{ matrix.k8-target }}.tar
+          docker image tag fluvio-community/fluvio:${{ github.sha }}-${{ matrix.k8-target }} fluvio-community/fluvio:${{ github.sha }}
           docker image ls -a
 
       - name: Install Kind
@@ -355,7 +355,7 @@ jobs:
       - name: Load image to kind
         if: ${{ matrix.k8 == 'kind' }}
         run: |
-          kind load image-archive /tmp/infinyon-fluvio-${{ matrix.k8-target }}.tar
+          kind load image-archive /tmp/fluvio-${{ matrix.k8-target }}.tar
       - name: Start Cluster
         if: ${{ matrix.k8 == 'kind' }}
         timeout-minutes: 3

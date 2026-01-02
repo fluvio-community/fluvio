@@ -527,12 +527,12 @@ jobs:
       - name: Build Docker image
         run: k8-util/docker/build.sh ${{ matrix.rust-target }} ${{ github.sha }} "$(pwd)/fluvio-run"
       - name: Export Docker Image to tarball
-        run: docker image save infinyon/fluvio:${{ github.sha }}-${{ matrix.rust-target }} --output /tmp/infinyon-fluvio-${{ matrix.rust-target }}.tar
+        run: docker image save fluvio-community/fluvio:${{ github.sha }}-${{ matrix.rust-target }} --output /tmp/fluvio-${{ matrix.rust-target }}.tar
       - name: Upload tarball as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: infinyon-fluvio-${{ matrix.rust-target }}.tar
-          path: /tmp/infinyon-fluvio-${{ matrix.rust-target }}.tar
+          name: fluvio-${{ matrix.rust-target }}.tar
+          path: /tmp/fluvio-${{ matrix.rust-target }}.tar
           retention-days: 1
 
   k8_cluster_test:
@@ -575,7 +575,7 @@ jobs:
       - name: Download Docker Image as Artifact
         uses: actions/download-artifact@v4
         with:
-          name: infinyon-fluvio-${{ matrix.rust-target }}.tar
+          name: fluvio-${{ matrix.rust-target }}.tar
           path: /tmp
 
       - name: Set up Fluvio binaries
@@ -590,16 +590,16 @@ jobs:
       - name: Load Fluvio Docker Image
         run: |
           ls -la /tmp
-          docker image load --input /tmp/infinyon-fluvio-${{ matrix.rust-target }}.tar
-          docker image tag infinyon/fluvio:${{ github.sha }}-${{ matrix.rust-target }} infinyon/fluvio:${{ github.sha }}
+          docker image load --input /tmp/fluvio-${{ matrix.rust-target }}.tar
+          docker image tag fluvio-community/fluvio:${{ github.sha }}-${{ matrix.rust-target }} fluvio-community/fluvio:${{ github.sha }}
           docker image ls -a
       #- name: Load Docker image for Minikube
       #    eval $(minikube -p minikube docker-env)
-      #    docker image load --input /tmp/infinyon-fluvio.tar
+      #    docker image load --input /tmp/fluvio.tar
       #    docker image ls -a
 
       - name: Export Docker Image to tarball
-        run: docker image save infinyon/fluvio:${{ github.sha }} --output /tmp/infinyon-fluvio.tar
+        run: docker image save fluvio-community/fluvio:${{ github.sha }} --output /tmp/fluvio.tar
       - name: Install K3d
         if: matrix.k8 == 'k3d'
         run: |
@@ -608,7 +608,7 @@ jobs:
       - name: Load image to K3d
         if: matrix.k8 == 'k3d'
         run: |
-          k3d image import -k /tmp/infinyon-fluvio.tar -c fluvio
+          k3d image import -k /tmp/fluvio.tar -c fluvio
       - name: Install Minikube and import image
         if: matrix.k8 == 'minikube'
         uses: manusa/actions-setup-minikube@v2.7.2
@@ -621,7 +621,7 @@ jobs:
         if: matrix.k8 == 'minikube'
         run: |
           eval $(minikube -p minikube docker-env)
-          docker image load --input /tmp/infinyon-fluvio.tar
+          docker image load --input /tmp/fluvio.tar
       - name: Create k8 namespace
         run: |
           kubectl create ns fluvio-test
@@ -685,7 +685,7 @@ jobs:
       - name: Download Docker Image as Artifact
         uses: actions/download-artifact@v4
         with:
-          name: infinyon-fluvio-${{ matrix.rust-target }}.tar
+          name: fluvio-${{ matrix.rust-target }}.tar
           path: /tmp
       - name: Mark executable
         run: |
@@ -696,12 +696,12 @@ jobs:
       - name: Load Fluvio Docker Image
         run: |
           ls -la /tmp
-          docker image load --input /tmp/infinyon-fluvio-${{ matrix.rust-target }}.tar
-          docker image tag infinyon/fluvio:${{ github.sha }}-${{ matrix.rust-target }} infinyon/fluvio:${{ github.sha }}
+          docker image load --input /tmp/fluvio-${{ matrix.rust-target }}.tar
+          docker image tag fluvio-community/fluvio:${{ github.sha }}-${{ matrix.rust-target }} fluvio-community/fluvio:${{ github.sha }}
           docker image ls -a
 
       - name: Export Docker Image to tarball
-        run: docker image save infinyon/fluvio:${{ github.sha }} --output /tmp/infinyon-fluvio.tar
+        run: docker image save fluvio-community/fluvio:${{ github.sha }} --output /tmp/fluvio.tar
 
       - name: Run upgrade test with CI artifacts
         timeout-minutes: 10
@@ -709,7 +709,7 @@ jobs:
           TEST_DATA_BYTES: 10000
         run: |
           date
-          k3d image import -k /tmp/infinyon-fluvio.tar -c fluvio
+          k3d image import -k /tmp/fluvio.tar -c fluvio
           make FLUVIO_BIN=~/bin/fluvio upgrade-test
 
       - name: Run diagnostics
@@ -867,7 +867,7 @@ jobs:
       # Download stable, this will load into ~/.fluvio/bin which will be in PATH
       # from now, fluvio will be stable
       - name: Setup Fluvio
-        uses: infinyon/fluvio/.github/actions/setup-fluvio@master
+        uses: fluvio-community/fluvio/.github/actions/setup-fluvio@master
 
       # Download artifacts from development build
       - name: Download artifact - fluvio
@@ -1145,7 +1145,7 @@ jobs:
       - name: Download Docker Image as Artifact
         uses: actions/download-artifact@v4
         with:
-          name: infinyon-fluvio-${{ matrix.rust-target }}.tar
+          name: fluvio-${{ matrix.rust-target }}.tar
           path: /tmp
 
       - name: Set up Fluvio binaries
@@ -1166,19 +1166,19 @@ jobs:
       - name: Load Fluvio Docker Image
         run: |
           ls -la /tmp
-          docker image load --input /tmp/infinyon-fluvio-${{ matrix.rust-target }}.tar
-          docker image tag infinyon/fluvio:${{ github.sha }}-${{ matrix.rust-target }} infinyon/fluvio:${{ github.sha }}
+          docker image load --input /tmp/fluvio-${{ matrix.rust-target }}.tar
+          docker image tag fluvio-community/fluvio:${{ github.sha }}-${{ matrix.rust-target }} fluvio-community/fluvio:${{ github.sha }}
           docker image ls -a
 
       - name: Export Docker Image to tarball
-        run: docker image save infinyon/fluvio:${{ github.sha }} --output /tmp/infinyon-fluvio.tar
+        run: docker image save fluvio-community/fluvio:${{ github.sha }} --output /tmp/fluvio.tar
       - name: Install K3d
         run: |
           curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} bash
           ./k8-util/cluster/reset-k3d.sh
       - name: Load image to K3d
         run: |
-          k3d image import -k /tmp/infinyon-fluvio.tar -c fluvio
+          k3d image import -k /tmp/fluvio.tar -c fluvio
 
       - name: Create k8 namespace
         run: |

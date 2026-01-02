@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Fluvio
-        uses: infinyon/fluvio/.github/actions/setup-fluvio@master
+        uses: fluvio-community/fluvio/.github/actions/setup-fluvio@master
         with:
           version: latest
       - name: Run Resume test
