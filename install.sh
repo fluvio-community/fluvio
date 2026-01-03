@@ -5,7 +5,9 @@
 set -e
 
 # Constants
+readonly FVM_HOME="${FVM_HOME:-$HOME/.fvm}"
 readonly FLUVIO_HOME="${FLUVIO_HOME:-$HOME/.fluvio}"
+readonly FVM_BIN="${FVM_HOME}/bin"
 readonly FLUVIO_BIN="${FLUVIO_HOME}/bin"
 readonly GITHUB_REPO="${GITHUB_REPO:-fluvio-community/fluvio}"
 readonly GITHUB_API="https://api.github.com"
@@ -150,14 +152,15 @@ extract_binary() {
 install_fluvio() {
     local version="${VERSION:-$(get_latest_release)}"
     local target=$(detect_platform)
+    local fluvio_version="${FLUVIO_VERSION:-stable}"
 
-    info "Installing Fluvio version: ${version}"
+    info "Installing FVM from version: ${version}"
     info "Target platform: ${target}"
 
     # Create directories
-    mkdir -p "${FLUVIO_BIN}"
+    mkdir -p "${FLUVIO_HOME}"
 
-    # Download FVM
+    # Download FVM from GitHub releases
     local fvm_url="${GITHUB_RELEASES}/download/v${version}/fvm-${target}.zip"
     local fvm_zip="${FLUVIO_HOME}/fvm.zip"
 
@@ -168,27 +171,24 @@ install_fluvio() {
         exit 1
     fi
 
-    info "Installing FVM..."
-    extract_binary "$fvm_zip" "${FLUVIO_BIN}" "fvm"
+    info "Extracting FVM..."
+    if ! extract_binary "$fvm_zip" "${FLUVIO_HOME}" "fvm"; then
+        error "Failed to extract FVM"
+        exit 1
+    fi
     rm -f "$fvm_zip"
+
+    # Run fvm self install
+    info "Installing FVM..."
+    "${FLUVIO_HOME}/fvm" self install
 
     success "FVM installed successfully"
 
-    # Download Fluvio CLI
-    local fluvio_url="${GITHUB_RELEASES}/download/v${version}/fluvio-${target}.zip"
-    local fluvio_zip="${FLUVIO_HOME}/fluvio.zip"
+    # Install Fluvio using FVM
+    info "Installing Fluvio ${fluvio_version} using FVM..."
+    "${FVM_BIN}/fvm" install "${fluvio_version}"
 
-    info "Downloading Fluvio CLI..."
-    if ! download_file "$fluvio_url" "$fluvio_zip"; then
-        error "Failed to download Fluvio CLI from ${fluvio_url}"
-        exit 1
-    fi
-
-    info "Installing Fluvio CLI..."
-    extract_binary "$fluvio_zip" "${FLUVIO_BIN}" "fluvio"
-    rm -f "$fluvio_zip"
-
-    success "Fluvio CLI installed successfully"
+    success "Fluvio installed successfully"
 }
 
 # Add Fluvio to PATH
@@ -218,14 +218,15 @@ setup_path() {
         if ! grep -q "FLUVIO_HOME" "$shell_rc"; then
             echo '' >> "$shell_rc"
             echo '# Fluvio' >> "$shell_rc"
+            echo "export FVM_HOME=\"${FVM_HOME}\"" >> "$shell_rc"
             echo "export FLUVIO_HOME=\"${FLUVIO_HOME}\"" >> "$shell_rc"
-            echo 'export PATH="$FLUVIO_HOME/bin:$PATH"' >> "$shell_rc"
+            echo 'export PATH="$FVM_HOME/bin:$FLUVIO_HOME/bin:$PATH"' >> "$shell_rc"
             info "Added Fluvio to PATH in ${shell_rc}"
         fi
     fi
 
     # Add to current session
-    export PATH="${FLUVIO_BIN}:$PATH"
+    export PATH="${FVM_BIN}:${FLUVIO_BIN}:$PATH"
 }
 
 # Print post-installation message
@@ -233,12 +234,13 @@ print_success_message() {
     echo ""
     success "Fluvio has been installed successfully!"
     echo ""
+    info "FVM is installed in: ${FVM_HOME}"
     info "Fluvio is installed in: ${FLUVIO_HOME}"
     echo ""
     info "To get started, run:"
     echo ""
     echo "  # Add Fluvio to your PATH (if not done automatically)"
-    echo "  export PATH=\"\$HOME/.fluvio/bin:\$PATH\""
+    echo "  export PATH=\"\$HOME/.fvm/bin:\$HOME/.fluvio/bin:\$PATH\""
     echo ""
     echo "  # Start a local Fluvio cluster"
     echo "  fluvio cluster start"
