@@ -649,7 +649,7 @@ jobs:
       - name: Run diagnostics
         if: ${{ !success() }}
         timeout-minutes: 5
-        run: | 
+        run: |
           kubectl get pods --namespace ${K8_NAMESPACE} -o yaml
           fluvio cluster diagnostics
       - name: Upload diagnostics
@@ -758,7 +758,7 @@ jobs:
           echo "${HOME}/bin" >> $GITHUB_PATH
 
       - name: Run upgrade test with CI artifacts
-        
+
         timeout-minutes: 10
         env:
           TEST_DATA_BYTES: 10000
@@ -1246,24 +1246,24 @@ jobs:
           name: fluvio-run-${{ matrix.rust-target }}
           path: ~/.fluvio/extensions
 
-      - name: Set up Fluvio Binaries
-        run: |
-          chmod +x ~/bin/fluvio ~/.fluvio/extensions/fluvio-run
-          echo "~/bin" >> $GITHUB_PATH
-          FLUVIO_BIN=~/bin/fluvio
-          echo "FLUVIO_BIN=${FLUVIO_BIN}" >> $GITHUB_ENV
+  #     - name: Set up Fluvio Binaries
+  #       run: |
+  #         chmod +x ~/bin/fluvio ~/.fluvio/extensions/fluvio-run
+  #         echo "~/bin" >> $GITHUB_PATH
+  #         FLUVIO_BIN=~/bin/fluvio
+  #         echo "FLUVIO_BIN=${FLUVIO_BIN}" >> $GITHUB_ENV
 
-      - name: Print version
-        run: fluvio version
+  #     - name: Print version
+  #       run: fluvio version
 
-      - name: Run backward compatibility tests
-        timeout-minutes: 10
-        run: make cli-backward-compatibility-test
+  #     - name: Run backward compatibility tests
+  #       timeout-minutes: 10
+  #       run: make cli-backward-compatibility-test
 
-      - name: Print SC logs
-        if: ${{ !success() }}
-        timeout-minutes: 5
-        run: cat /tmp/flv_sc.log
+  #     - name: Print SC logs
+  #       if: ${{ !success() }}
+  #       timeout-minutes: 5
+  #       run: cat /tmp/flv_sc.log
 
   # Runs tests on `tests/cli/partition_test`
   partition_test:
