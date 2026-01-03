@@ -250,16 +250,9 @@ where
 
         for spu in self.read().await.values() {
             if let Some(rack) = &spu.spec.rack {
-                let mut ids: Vec<SpuId>;
-                let mut ids_in_map = rack_spus.remove(rack);
-                if ids_in_map.is_some() {
-                    ids = ids_in_map.as_mut().unwrap().to_vec();
-                    ids.push(spu.spec.id);
-                } else {
-                    ids = vec![spu.spec.id];
-                }
+                let ids = rack_spus.entry(rack.clone()).or_default();
+                ids.push(spu.spec.id);
                 ids.sort_unstable();
-                rack_spus.insert(rack.clone(), ids);
             }
         }
 

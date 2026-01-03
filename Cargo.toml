@@ -63,7 +63,7 @@ resolver = "2"
 version = "0.50.2"
 edition = "2024"
 license = "Apache-2.0"
-repository = "https://github.com/infinyon/fluvio"
+repository = "https://github.com/fluvio-community/fluvio"
 authors = ["Fluvio Contributors <team@fluvio.io>"]
 
 [workspace.dependencies]

@@ -1,7 +1,7 @@
 version: "3"
 services:
   sc:
-    image: infinyon/fluvio:stable
+    image: fluvio-community/fluvio:stable
     container_name: sc
     hostname: sc
     ports:
@@ -27,7 +27,7 @@ services:
     depends_on:
       - sc
   spu:
-    image: infinyon/fluvio:stable
+    image: fluvio-community/fluvio:stable
     container_name: spu
     hostname: spu
     volumes:

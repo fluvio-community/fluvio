@@ -16,7 +16,7 @@ components separately, we can use Docker Compose `service`s to achieve this.
 
 ## Running Locally
 
-Clone this repo using `git clone https://github.com/infinyon/fluvio.git` and
+Clone this repo using `git clone https://github.com/fluvio-community/fluvio.git` and
 cd into `./fluvio/examples/docker-compose`, then run `docker compose up`.
 
 > Optionally you can run on detached mode `docker compose up -d` so

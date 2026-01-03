@@ -35,7 +35,7 @@ conventional_commits = true
 filter_unconventional = false
 
 commit_preprocessors = [
-    { pattern = "\\(#([0-9]+)\\)", replace = "([#${1}](https://github.com/infinyon/fluvio/issues/${1}))"}
+    { pattern = "\\(#([0-9]+)\\)", replace = "([#${1}](https://github.com/fluvio-community/fluvio/issues/${1}))"}
 ]
 
 # regex for parsing and grouping commits
