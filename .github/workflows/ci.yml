@@ -592,6 +592,7 @@ jobs:
           ls -la /tmp
           docker image load --input /tmp/fluvio-${{ matrix.rust-target }}.tar
           docker image tag fluvio-community/fluvio:${{ github.sha }}-${{ matrix.rust-target }} fluvio-community/fluvio:${{ github.sha }}
+          docker image tag fluvio-community/fluvio:${{ github.sha }}-${{ matrix.rust-target }} ghcr.io/fluvio-community/fluvio:${{ github.sha }}
           docker image ls -a
       #- name: Load Docker image for Minikube
       #    eval $(minikube -p minikube docker-env)
@@ -599,7 +600,7 @@ jobs:
       #    docker image ls -a
 
       - name: Export Docker Image to tarball
-        run: docker image save fluvio-community/fluvio:${{ github.sha }} --output /tmp/fluvio.tar
+        run: docker image save ghcr.io/fluvio-community/fluvio:${{ github.sha }} --output /tmp/fluvio.tar
       - name: Install K3d
         if: matrix.k8 == 'k3d'
         run: |
@@ -704,7 +705,7 @@ jobs:
           docker image ls -a
 
       - name: Export Docker Image to tarball
-        run: docker image save fluvio-community/fluvio:${{ github.sha }} --output /tmp/fluvio.tar
+        run: docker image save ghcr.io/fluvio-community/fluvio:${{ github.sha }} --output /tmp/fluvio.tar
 
       - name: Run upgrade test with CI artifacts
         timeout-minutes: 10
@@ -1001,7 +1002,7 @@ jobs:
         timeout-minutes: 20
         run: |
           rm -rf ~/.fvm
-          make FVM_BIN=~/bin/fvm INFINYON_HUB_REMOTE="https://hub-dev.infinyon.cloud" cli-fvm-smoke
+          make FVM_BIN=~/bin/fvm cli-fvm-smoke
 
 
   read_only_test:
@@ -1170,10 +1171,11 @@ jobs:
           ls -la /tmp
           docker image load --input /tmp/fluvio-${{ matrix.rust-target }}.tar
           docker image tag fluvio-community/fluvio:${{ github.sha }}-${{ matrix.rust-target }} fluvio-community/fluvio:${{ github.sha }}
+          docker image tag fluvio-community/fluvio:${{ github.sha }}-${{ matrix.rust-target }} ghcr.io/fluvio-community/fluvio:${{ github.sha }}
           docker image ls -a
 
       - name: Export Docker Image to tarball
-        run: docker image save fluvio-community/fluvio:${{ github.sha }} --output /tmp/fluvio.tar
+        run: docker image save ghcr.io/fluvio-community/fluvio:${{ github.sha }} --output /tmp/fluvio.tar
       - name: Install K3d
         run: |
           curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} bash

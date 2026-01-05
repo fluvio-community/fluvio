@@ -8,7 +8,7 @@ scLog: info
 tls: false
 imagePullSecrets: []
 image:
-  registry: fluvio-community
+  registry: ghcr.io/fluvio-community
   tag: ""
   pullPolicy: IfNotPresent
 cert:

@@ -57,7 +57,7 @@ use super::constants::*;
 use super::common::try_connect_to_sc;
 
 pub const DEFAULT_SPU_GROUP_NAME: &str = "main";
-const DEFAULT_REGISTRY: &str = "fluvio-community";
+const DEFAULT_REGISTRY: &str = "ghcr.io/fluvio-community";
 const DEFAULT_SERVICE_TYPE: &str = "NodePort";
 
 const FLUVIO_SC_SERVICE: &str = "fluvio-sc-public";
@@ -107,7 +107,7 @@ pub struct ClusterConfig {
     /// # Example
     ///
     /// Suppose you would like to install version `0.6.0` of Fluvio from
-    /// Docker Hub, where the image is tagged as `infinyon/fluvio:0.6.0`.
+    /// a container registry, where the image is tagged as `fluvio-community/fluvio:0.6.0`.
     /// You can do that like this:
     ///
     /// ```
@@ -121,11 +121,11 @@ pub struct ClusterConfig {
     /// ```
     #[builder(setter(into, strip_option), default)]
     image_tag: Option<String>,
-    /// Sets the docker image registry to use to download Fluvio images.
+    /// Sets the container image registry prefix used to download Fluvio images.
     ///
-    /// This defaults to `infinyon` to pull from Infinyon's official Docker Hub
-    /// registry. This can be used to specify a private registry or a local
-    /// registry as a source of Fluvio images.
+    /// This defaults to `ghcr.io/fluvio-community` to pull from the GitHub
+    /// Container Registry. This can be used to specify a private registry or a
+    /// local registry as a source of Fluvio images.
     ///
     /// # Example
     ///
@@ -136,7 +136,7 @@ pub struct ClusterConfig {
     /// docker run -d -p 5000:5000 --restart=always --name registry registry:2
     /// ```
     ///
-    /// Suppose you tagged your image as `infinyon/fluvio:0.1.0` and pushed it
+    /// Suppose you tagged your image as `fluvio-community/fluvio:0.1.0` and pushed it
     /// to your `localhost:5000` registry. Your image is now located at
     /// `localhost:5000/infinyon`. You can specify that to the installer like so:
     ///
