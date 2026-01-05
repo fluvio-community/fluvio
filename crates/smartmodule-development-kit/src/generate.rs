@@ -16,7 +16,7 @@ use lib_cargo_crate::{Info, InfoOpts};
 static SMART_MODULE_TEMPLATE: Dir<'static> =
     include_dir!("$CARGO_MANIFEST_DIR/../../smartmodule/cargo_template");
 const FLUVIO_SMARTMODULE_CRATE_NAME: &str = "fluvio-smartmodule";
-const FLUVIO_SMARTMODULE_REPO: &str = "https://github.com/infinyon/fluvio.git";
+const FLUVIO_SMARTMODULE_REPO: &str = "https://github.com/fluvio-community/fluvio.git";
 
 /// Generate new SmartModule project
 #[derive(Debug, Parser)]

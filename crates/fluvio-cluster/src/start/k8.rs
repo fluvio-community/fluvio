@@ -57,7 +57,7 @@ use super::constants::*;
 use super::common::try_connect_to_sc;
 
 pub const DEFAULT_SPU_GROUP_NAME: &str = "main";
-const DEFAULT_REGISTRY: &str = "infinyon";
+const DEFAULT_REGISTRY: &str = "fluvio-community";
 const DEFAULT_SERVICE_TYPE: &str = "NodePort";
 
 const FLUVIO_SC_SERVICE: &str = "fluvio-sc-public";

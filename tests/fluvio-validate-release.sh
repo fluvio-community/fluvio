@@ -60,8 +60,8 @@ function validate_docker_image() {
     EXPECTED_FLUVIO_RUN_VERSION=$FLUVIO_VERSION_CHECK
 
     # Validate that the docker image has the correct Fluvio binaries
-    docker pull infinyon/fluvio:$EXPECTED_FLUVIO_RUN_VERSION
-    DOCKER_FLUVIO_RUN_VERSION=$(docker run infinyon/fluvio:$EXPECTED_FLUVIO_RUN_VERSION sh -c "/fluvio-run --version" | awk '{print $2}' | tr -d '[:space:]')
+    docker pull fluvio-community/fluvio:$EXPECTED_FLUVIO_RUN_VERSION
+    DOCKER_FLUVIO_RUN_VERSION=$(docker run fluvio-community/fluvio:$EXPECTED_FLUVIO_RUN_VERSION sh -c "/fluvio-run --version" | awk '{print $2}' | tr -d '[:space:]')
 
     if [ "$DOCKER_FLUVIO_RUN_VERSION" = "$EXPECTED_FLUVIO_RUN_VERSION" ]; then
       echo "✅ Docker fluvio run version check passed: $EXPECTED_FLUVIO_RUN_VERSION";

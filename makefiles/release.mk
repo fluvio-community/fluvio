@@ -80,12 +80,8 @@ clean-publish:
 #### End testing
 
 
-# Login to Docker Hub
-docker-hub-login:
-	$(DRY_RUN_ECHO) docker login --username=$(DOCKER_USERNAME) --password=$(DOCKER_PASSWORD)
-
-docker-hub-check-image-exists:
-	if [ $(lastword $(shell docker pull --quiet infinyon/fluvio:$(DOCKER_IMAGE_TAG); echo $$?)) -eq 0 ]; then \
+docker-check-image-exists:
+	if [ $(lastword $(shell docker pull --quiet fluvio-community/fluvio:$(DOCKER_IMAGE_TAG); echo $$?)) -eq 0 ]; then \
 		echo Image tag already exists; \
 		exit 0; \
 	else \
@@ -94,17 +90,17 @@ docker-hub-check-image-exists:
 	fi
 
 # Get Fluvio VERSION from Github, provided a given git SHA
-docker-create-manifest: docker-hub-login
-	$(DRY_RUN_ECHO) docker manifest create "docker.io/infinyon/fluvio:$(DOCKER_IMAGE_TAG)" \
-		"docker.io/infinyon/fluvio:$(DEV_VERSION_TAG)-amd64" \
-		"docker.io/infinyon/fluvio:$(DEV_VERSION_TAG)-arm64v8"
+docker-create-manifest:
+	$(DRY_RUN_ECHO) docker manifest create "ghcr.io/fluvio-community/fluvio:$(DOCKER_IMAGE_TAG)" \
+		"ghcr.io/fluvio-community/fluvio:$(DEV_VERSION_TAG)-amd64" \
+		"ghcr.io/fluvio-community/fluvio:$(DEV_VERSION_TAG)-arm64v8"
 
 docker-push-manifest: docker-create-manifest
-	$(DRY_RUN_ECHO) docker manifest push "docker.io/infinyon/fluvio:$(DOCKER_IMAGE_TAG)"
+	$(DRY_RUN_ECHO) docker manifest push "ghcr.io/fluvio-community/fluvio:$(DOCKER_IMAGE_TAG)"
 
 # Create latest development Fluvio image
 docker-create-manifest-dev: DOCKER_IMAGE_TAG=latest
-docker-create-manifest-dev: docker-hub-login docker-create-manifest
+docker-create-manifest-dev: docker-create-manifest
 
 # Push docker manifest
 docker-push-manifest-dev: DOCKER_IMAGE_TAG=latest
@@ -131,7 +127,7 @@ install-fluvio-package:
 
 # Requires GH_TOKEN set or `gh auth login`
 download-fluvio-release:
-	$(DRY_RUN_ECHO) gh release download $(GH_RELEASE_TAG) -R infinyon/fluvio --skip-existing
+	$(DRY_RUN_ECHO) gh release download $(GH_RELEASE_TAG) -R fluvio-community/fluvio --skip-existing
 
 unzip-gh-release-artifacts: download-fluvio-release
 	@echo "unzip stuff"
@@ -272,7 +268,7 @@ build-release-notes:
 	cat /tmp/release_notes
 
 create-gh-release: download-fluvio-release build-release-notes
-	$(DRY_RUN_ECHO) gh release create -R infinyon/fluvio \
+	$(DRY_RUN_ECHO) gh release create -R fluvio-community/fluvio \
 		$(GH_PRE_RELEASE_FLAG) \
 		--title="v$(VERSION)" \
 		-F /tmp/release_notes \

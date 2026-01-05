@@ -8,17 +8,17 @@ use std::time::Duration;
 pub mod render;
 
 use anyhow::Result;
-use colored::Colorize;
-use fluvio_future::timer::sleep;
-use fluvio_types::config_file::SaveLoadConfig;
-use indicatif::style::TemplateError;
-use tracing::{error, debug};
 use async_trait::async_trait;
-use url::ParseError;
+use colored::Colorize;
+use indicatif::style::TemplateError;
 use semver::Version;
 use serde_json::Error as JsonError;
 use sysinfo::System;
+use tracing::debug;
+use url::ParseError;
 
+use fluvio_future::timer::sleep;
+use fluvio_types::config_file::SaveLoadConfig;
 use fluvio_helm::{HelmClient, HelmError};
 use k8_config::{ConfigError as K8ConfigError, K8Config};
 

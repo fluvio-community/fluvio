@@ -176,6 +176,9 @@ setup_file() {
     # move into test dir
     cd $TEST_DIR
 
+    # ensure no leftover directory from previous runs
+    rm -rf "$SINK_CONN_NAME"
+
     # generate a sink connector
     run $CDK_BIN generate $SINK_CONN_NAME \
         --group "$PROJECT_NAME_PREFIX" \
@@ -197,6 +200,9 @@ setup_file() {
 
     # move into test dir
     cd $TEST_DIR
+
+    # ensure no leftover directory from previous runs
+    rm -rf "$SOURCE_CONN_NAME"
 
     # generate a source connector
     run $CDK_BIN generate $SOURCE_CONN_NAME \
