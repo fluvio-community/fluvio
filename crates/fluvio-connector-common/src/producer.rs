@@ -1,4 +1,5 @@
 use fluvio::{TopicProducerPool, Fluvio, FluvioClusterConfig, TopicProducerConfigBuilder};
+use crate::tracing::info;
 use crate::{config::ConnectorConfig, Result};
 
 use crate::{ensure_topic_exists, smartmodule::smartmodule_chain_from_config};
@@ -12,6 +13,18 @@ pub async fn producer_from_config(config: &ConnectorConfig) -> Result<(Fluvio, T
     let mut config_builder = &mut TopicProducerConfigBuilder::default();
 
     if let Some(producer_params) = &config.meta().producer() {
+        let producer_batch_size_bytes = producer_params.batch_size.map(|v| v.as_u64());
+        let producer_max_request_size_bytes = producer_params.max_request_size.map(|v| v.as_u64());
+        info!(
+            connector = %config.meta().name(),
+            topic = %config.meta().topic(),
+            producer_linger = ?producer_params.linger,
+            producer_compression = ?producer_params.compression,
+            producer_batch_size_bytes = ?producer_batch_size_bytes,
+            producer_max_request_size_bytes = ?producer_max_request_size_bytes,
+            "Using producer config"
+        );
+
         // Linger
         if let Some(linger) = producer_params.linger {
             config_builder = config_builder.linger(linger)
