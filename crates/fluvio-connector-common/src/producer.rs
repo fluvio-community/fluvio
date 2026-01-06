@@ -26,6 +26,11 @@ pub async fn producer_from_config(config: &ConnectorConfig) -> Result<(Fluvio, T
         if let Some(batch_size) = producer_params.batch_size {
             config_builder = config_builder.batch_size(batch_size.as_u64() as usize)
         };
+
+        // Max request size
+        if let Some(max_request_size) = producer_params.max_request_size {
+            config_builder = config_builder.max_request_size(max_request_size.as_u64() as usize)
+        };
     };
 
     let producer_config = config_builder.build()?;

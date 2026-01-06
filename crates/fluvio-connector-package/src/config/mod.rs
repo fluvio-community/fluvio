@@ -311,6 +311,16 @@ pub struct ProducerParameters {
     )]
     #[schemars(skip)]
     pub batch_size: Option<ByteSize>,
+
+    #[serde(
+        rename = "max-request-size",
+        alias = "max_request_size",
+        with = "bytesize_serde",
+        skip_serializing_if = "Option::is_none",
+        default
+    )]
+    #[schemars(skip)]
+    pub max_request_size: Option<ByteSize>,
 }
 #[derive(Default, Debug, Clone, PartialEq, Eq, Deserialize, Serialize, Hash, JsonSchema)]
 pub struct SecretConfig {
@@ -702,6 +712,7 @@ mod tests {
                     linger: Some(Duration::from_millis(1)),
                     compression: Some(Compression::Gzip),
                     batch_size: Some(ByteSize::mb(44)),
+                    max_request_size: None,
                 }),
                 consumer: Some(ConsumerParameters {
                     partition: ConsumerPartitionConfig::One(10),
@@ -780,6 +791,7 @@ mod tests {
                     linger: Some(Duration::from_millis(1)),
                     compression: Some(Compression::Gzip),
                     batch_size: Some(ByteSize::mb(44)),
+                    max_request_size: None,
                 }),
                 consumer: Some(ConsumerParameters {
                     partition: ConsumerPartitionConfig::One(10),
@@ -991,6 +1003,7 @@ mod tests {
                     linger: None,
                     compression: None,
                     batch_size: Some(ByteSize::b(1600)),
+                    max_request_size: None,
                 }),
                 consumer: Some(ConsumerParameters {
                     max_bytes: Some(ByteSize::b(1400)),
@@ -1214,6 +1227,7 @@ mod tests {
                     linger: None,
                     compression: None,
                     batch_size: Some(ByteSize::b(1600)),
+                    max_request_size: None,
                 }),
                 consumer: Some(ConsumerParameters {
                     max_bytes: Some(ByteSize::b(1400)),
