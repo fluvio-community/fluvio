@@ -13,13 +13,18 @@ authors.workspace = true
 [dependencies]
 anyhow = { workspace = true }
 async-trait = { workspace = true }
+cargo_toml = { workspace = true }
+chrono = { workspace = true }
 hex = { workspace = true }
 http = { workspace = true }
 octocrab = { workspace = true, features = ["default-client", "rustls", "rustls-aws-lc-rs"]}
+pathdiff = { workspace = true }
 sha2 = { workspace = true }
 semver = { workspace = true, features = ["serde"] }
 serde = { workspace = true, features=["derive"] }
 serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+tar = { workspace = true }
 tempfile = { workspace = true }
 tracing = { workspace = true }
 thiserror = { workspace = true }

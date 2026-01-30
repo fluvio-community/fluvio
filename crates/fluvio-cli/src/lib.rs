@@ -4,7 +4,6 @@
 
 mod error;
 pub mod client;
-pub mod install;
 mod profile;
 mod version;
 mod metadata;
@@ -15,27 +14,8 @@ pub(crate) use error::CliError;
 use fluvio_extension_common as common;
 pub(crate) const VERSION: &str = include_str!("../../../VERSION");
 
-use fluvio_index::HttpAgent;
-use install::update::{
-    should_always_print_available_update, check_update_available, prompt_available_update,
-};
-// list of public export
 pub use root::{Root, HelpOpt};
 pub use client::TableFormatConfig;
-
-// Checks for an update if channel is latest or ALWAYS_CHECK is set
-async fn check_for_channel_update() {
-    if should_always_print_available_update() {
-        println!("🔍 Checking for new version");
-        let agent = HttpAgent::default();
-        let update_result = check_update_available(&agent, false).await;
-        if let Ok(Some(latest_version)) = update_result {
-            prompt_available_update(&latest_version);
-        } else {
-            println!("✅ fluvio-cli is up to date");
-        }
-    }
-}
 
 mod util {
     use fluvio_spu_schema::Isolation;
@@ -64,7 +44,6 @@ mod util {
 }
 
 mod root {
-    use crate::check_for_channel_update;
     use std::sync::Arc;
     use std::path::PathBuf;
     use std::process::Command;
@@ -78,10 +57,9 @@ mod root {
     #[cfg(feature = "k8s")]
     use fluvio_cluster::cli::ClusterCmd;
     use fluvio_cli_common::install::fluvio_extensions_dir;
-    use fluvio_channel::{FLUVIO_RELEASE_CHANNEL, LATEST_CHANNEL_NAME};
+    use fluvio_channel::FLUVIO_RELEASE_CHANNEL;
 
     use crate::profile::ProfileOpt;
-    use crate::install::opts::InstallOpt;
     use crate::client::FluvioCmd;
     use crate::metadata::{MetadataOpt, subcommand_metadata};
     use crate::version::VersionOpt;
@@ -100,11 +78,6 @@ mod root {
 
     impl Root {
         pub async fn process(self) -> Result<()> {
-            if command_triggers_update_check(&self.command) {
-                tracing::info!("Triggered a Fluvio Update Check");
-                check_for_channel_update().await;
-            }
-
             self.command.process(self.opts).await?;
             Ok(())
         }
@@ -132,7 +105,7 @@ mod root {
         /// All top-level commands that require a Fluvio client are bundled in `FluvioCmd`
         #[command(flatten)]
         #[cfg(feature = "consumer")]
-        Fluvio(FluvioCmd),
+        Fluvio(Box<FluvioCmd>),
 
         /// Run Fluvio benchmarks
         #[command(name = "benchmark", alias = "bench")]
@@ -152,16 +125,6 @@ mod root {
         #[cfg(feature = "k8s")]
         #[command(subcommand, name = "cluster")]
         Cluster(Box<ClusterCmd>),
-
-        /// Install Fluvio plugins
-        ///
-        /// The Fluvio CLI considers any executable with the prefix `fluvio-` to be a
-        /// CLI plugin. For example, an executable named `fluvio-foo` in your PATH may
-        /// be invoked by running `fluvio foo`.
-        ///
-        /// This command allows you to install plugins from Fluvio's package registry.
-        #[command(name = "install", hide = true)]
-        Install(InstallOpt),
 
         /// Print Fluvio version information
         #[command(name = "version")]
@@ -205,17 +168,6 @@ mod root {
 
                     let version = semver::Version::parse(crate::VERSION).unwrap();
                     cluster.process(out, version, root.target).await?;
-                }
-                Self::Install(mut install) => {
-                    if let Ok(channel_name) = std::env::var(FLUVIO_RELEASE_CHANNEL) {
-                        println!("Current channel: {}", &channel_name);
-
-                        if channel_name == LATEST_CHANNEL_NAME {
-                            install.develop = true;
-                        }
-                    };
-
-                    install.process().await?;
                 }
                 Self::Version(version) => {
                     version.process(root.target).await?;
@@ -381,16 +333,5 @@ mod root {
         }
 
         Ok(())
-    }
-
-    /// Retrieves `true` if the provided `fluvio` command must trigger an
-    /// update check.
-    ///
-    /// Commands that must trigger update checks are:
-    ///
-    /// - `fluvio version`
-    #[inline]
-    fn command_triggers_update_check(cmd: &RootCmd) -> bool {
-        matches!(cmd, RootCmd::Version(_))
     }
 }

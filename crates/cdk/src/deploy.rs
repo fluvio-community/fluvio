@@ -1,17 +1,13 @@
 use std::{
     fmt::Debug,
-    path::{PathBuf, Path},
-    ffi::OsStr,
-    fs::{File, Permissions},
-    io::Write,
+    path::{PathBuf},
 };
 
 use anyhow::{Result, Context, anyhow};
-use clap::{Parser, Subcommand};
-use tempfile::TempDir;
-use tracing::{debug, trace};
-
 use cargo_builder::package::PackageInfo;
+use clap::{Parser, Subcommand};
+use tracing::debug;
+
 use fluvio_connector_deployer::{Deployment, DeploymentType, LogLevel};
 use fluvio_connector_package::metadata::ConnectorMetadata;
 use fluvio_connector_package::config::ConnectorConfig;
@@ -60,10 +56,6 @@ enum DeployStartCmd {
         /// Path to file with secrets. Secrets are 'key=value' pairs separated by the new line character. Optional
         #[arg(short, long, value_name = "PATH")]
         secrets: Option<PathBuf>,
-
-        /// Deploy from local package file
-        #[arg(long = "ipkg", value_name = "PATH")]
-        ipkg_file: Option<PathBuf>,
 
         /// Log level for the connector process
         #[arg(long, value_name = "LOG_LEVEL", default_value_t)]
@@ -149,9 +141,8 @@ impl DeployStartCmd {
             Self::Local {
                 config,
                 secrets,
-                ipkg_file,
                 log_level,
-            } => deploy_local(package, config, secrets, ipkg_file, log_level),
+            } => deploy_local(package, config, secrets, log_level),
         }
     }
 }
@@ -184,28 +175,14 @@ fn deploy_local(
     package_cmd: PackageCmd,
     config: PathBuf,
     secrets: Option<PathBuf>,
-    ipkg_file: Option<PathBuf>,
     log_level: LogLevel,
 ) -> Result<()> {
     let opt = package_cmd.as_opt();
-    let mut tmp_dir: Option<PathBuf> = None;
 
-    let (executable, connector_metadata) = match ipkg_file {
-        Some(ipkg_file) => {
-            let (exec, cmeta) =
-                from_ipkg_file(ipkg_file).context("Failed to deploy from ipkg file")?;
-            let mut exec_dir = exec.clone();
-            exec_dir.pop();
-            tmp_dir = Some(exec_dir);
-            (exec, cmeta)
-        }
-        None => {
-            let package_info = PackageInfo::from_options(&opt)?;
-            build_connector(&package_info, BuildOpts::with_release(opt.release.as_str()))?;
-            from_cargo_package(&package_info)
-                .context("Failed to deploy from within cargo package directory")?
-        }
-    };
+    let package_info = PackageInfo::from_options(&opt)?;
+    build_connector(&package_info, BuildOpts::with_release(opt.release.as_str()))?;
+    let (executable, connector_metadata) = from_cargo_package(&package_info)
+        .context("Failed to deploy from within cargo package directory")?;
 
     let metaconfig = ConnectorConfig::from_file(&config)
         .map_err(|e| anyhow!("Couldn't read config file {}: {e}", config.display()))?;
@@ -222,7 +199,6 @@ fn deploy_local(
         .log_level(log_level)
         .deployment_type(DeploymentType::Local {
             output_file: Some(log_path),
-            tmp_dir,
         });
     let result = builder.deploy()?;
     local_index::store(result)
@@ -289,64 +265,6 @@ pub(crate) fn from_cargo_package(
     Ok((executable_path, connector_metadata))
 }
 
-fn from_ipkg_file(ipkg_file: PathBuf) -> Result<(PathBuf, ConnectorMetadata)> {
-    println!("... checking package");
-    debug!(
-        "reading connector metadata from ipkg file {}",
-        ipkg_file.to_string_lossy()
-    );
-    let package_meta = fluvio_hub_util::package_get_meta(ipkg_file.to_string_lossy().as_ref())
-        .context("Failed to read package metadata")?;
-    let entries: Vec<&Path> = package_meta.manifest.iter().map(Path::new).collect();
-
-    let connector_toml = entries
-        .iter()
-        .find(|e| {
-            e.file_name()
-                .eq(&Some(OsStr::new(CONNECTOR_METADATA_FILE_NAME)))
-        })
-        .ok_or_else(|| anyhow!("Package missing {} file", CONNECTOR_METADATA_FILE_NAME))?;
-    let connector_toml_bytes =
-        fluvio_hub_util::package_get_manifest_file(&ipkg_file, connector_toml)?;
-    let connector_metadata = ConnectorMetadata::from_toml_slice(&connector_toml_bytes)?;
-    trace!("{:#?}", connector_metadata);
-
-    let binary_name = connector_metadata
-        .deployment
-        .binary
-        .as_ref()
-        .ok_or_else(|| anyhow!("Only binary deployments are supported at this moment"))?;
-    let binary = entries
-        .iter()
-        .find(|e| e.file_name().eq(&Some(OsStr::new(&binary_name))))
-        .ok_or_else(|| anyhow!("Package missing {} file", binary_name))?;
-
-    let binary_bytes = fluvio_hub_util::package_get_manifest_file(&ipkg_file, binary)?;
-    let mut executable_path = TempDir::with_prefix("cdk-deploy-")
-        .map_err(|e| anyhow!("Couldn't create tmpdir for cdk: {e}"))?
-        .into_path();
-    debug!(exe_tmp_dir=?executable_path, "ipkg temp dir");
-    executable_path.push(binary_name);
-    let mut file = File::create(&executable_path)?;
-    set_exec_permissions(&mut file)?;
-    file.write_all(&binary_bytes)?;
-
-    Ok((executable_path, connector_metadata))
-}
-
-#[cfg(unix)]
-fn set_exec_permissions(f: &mut File) -> Result<()> {
-    use std::os::unix::fs::PermissionsExt;
-
-    f.set_permissions(Permissions::from_mode(0o744))?;
-    Ok(())
-}
-
-#[cfg(not(unix))]
-fn set_exec_permissions(f: &mut File) -> Result<()> {
-    Ok(())
-}
-
 mod local_index {
 
     use std::{
@@ -381,7 +299,6 @@ mod local_index {
             process_id: u32,
             name: String,
             log_file: Option<PathBuf>,
-            tmp_dir: Option<PathBuf>,
         },
     }
 
@@ -436,20 +353,7 @@ mod local_index {
         fn remove(&mut self, index: usize) -> Result<()> {
             let entry = self.entries.remove(index);
             self.operator.kill(&entry)?;
-            match entry {
-                Entry::Local {
-                    process_id: _,
-                    name: _,
-                    log_file: _,
-                    tmp_dir: Some(ref tmp_dir),
-                } => {
-                    // clean up tmp dir used with ipkg
-                    std::fs::remove_dir_all(tmp_dir).map_err(|e| {
-                        anyhow!("could not clean up ipkg dir {}: {e}", tmp_dir.display())
-                    })
-                }
-                _ => Ok(()),
-            }
+            Ok(())
         }
 
         fn find_by_name(&self, connector_name: &str) -> Option<(usize, &Entry)> {
@@ -458,7 +362,6 @@ mod local_index {
                     process_id: _,
                     name,
                     log_file: _,
-                    tmp_dir: _,
                 } = entry;
                 name.eq(connector_name)
             })
@@ -490,7 +393,6 @@ mod local_index {
                     process_id: _,
                     name,
                     log_file: _,
-                    tmp_dir: _,
                 } = connector;
                 table.add_row(vec![name, status.to_string()]);
             }
@@ -505,7 +407,6 @@ mod local_index {
                 process_id,
                 name: _,
                 log_file: _,
-                tmp_dir: _,
             } = entry;
             let status = if self.system.process(Pid::from_u32(*process_id)).is_some() {
                 ConnectorStatus::Running
@@ -520,7 +421,6 @@ mod local_index {
                 process_id,
                 name: _,
                 log_file: _,
-                tmp_dir: _,
             } = entry;
 
             if let Some(process) = self.system.process(Pid::from_u32(*process_id)) {
@@ -546,12 +446,10 @@ mod local_index {
                     process_id,
                     name,
                     log_file,
-                    tmp_dir,
                 } => Entry::Local {
                     process_id,
                     name,
                     log_file,
-                    tmp_dir,
                 },
             }
         }
@@ -588,7 +486,6 @@ mod local_index {
                     process_id,
                     name,
                     log_file,
-                    tmp_dir: _,
                 },
             )) => {
                 let log_file = match log_file {
@@ -617,7 +514,6 @@ mod local_index {
                 process_id: _,
                 name: _,
                 log_file: Some(log_file),
-                tmp_dir: _,
             },
         )) = index.find_by_name(connector_name)
         {
@@ -689,7 +585,6 @@ mod local_index {
                 process_id: 1,
                 name: "test_connector".to_owned(),
                 log_file: None,
-                tmp_dir: None,
             })?;
             index.flush()?;
 
@@ -728,7 +623,6 @@ mod local_index {
                 process_id: 2,
                 name: "test_connector2".to_owned(),
                 log_file: None,
-                tmp_dir: None,
             })?;
             index.flush()?;
 
@@ -767,7 +661,6 @@ mod local_index {
                 process_id: 1,
                 name: "test_connector".to_owned(),
                 log_file: None,
-                tmp_dir: None,
             });
 
             //then

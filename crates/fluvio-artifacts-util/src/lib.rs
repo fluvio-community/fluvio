@@ -1,3 +1,4 @@
+mod package_meta_ext;
 mod utils;
 
 pub mod htclient;
@@ -5,6 +6,7 @@ pub mod htclient;
 pub mod fvm;
 
 pub use http;
+pub use package_meta_ext::*;
 pub use utils::*;
 pub use utils::sha256_digest;
 

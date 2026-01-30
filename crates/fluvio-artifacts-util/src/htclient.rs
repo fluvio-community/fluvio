@@ -67,6 +67,7 @@ where
 }
 
 /// Configures a `ureq::Agent` with a proxy, if one is defined in the environment.
+//  TODO: If `ureq` version is updated to 3.0.8, you can replace this function with `try_from_env` here, see more [PR #4438]
 fn configure_ureq_proxy() -> Result<Agent> {
     let agent_builder = AgentBuilder::new();
 
