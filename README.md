@@ -30,9 +30,20 @@ Fluvio is installed via the **Fluvio Version Manager**, shortened to `fvm`.
 
 To install `fvm`, run the following command:
 
+**TEMPORARY NOTE**: While we are transitioning to a new fluvio-community hosted
+fluvio build and release, you should install the dev version of FVM:
 ```bash
-curl -fsS https://hub.infinyon.cloud/install/install.sh | bash
+curl -fsS https://github.com/fluvio-community/fluvio/raw/master/install.sh | FVM_VERSION=dev bash
 ```
+
+After we get the fluvio-community based released sorted again, it will return to:
+
+```bash
+curl -fsS https://github.com/fluvio-community/fluvio/raw/master/install.sh | bash
+```
+
+
+
 As part of the initial setup, `fvm` will also install the Fluvio CLI available in the stable channel as of the moment of installation.
 
 Fluvio is stored in `$HOME/.fluvio`, with the executable binaries stored in `$HOME/.fluvio/bin`.
@@ -75,19 +86,28 @@ fluvio consume hello-fluvio -B -d
 
 Just like that! You have a local cluster running.
 
-## Using Pre-Build Fluvio Versions
+## Using Pre-Built Fluvio Versions
 
-You may want to prefer other Fluvio versions than the latest stable release. You can do so by specifying the version in the `VERSION` environment variable.
-**Install Latest Release (as of `master` branch)**
+You may want to use other Fluvio versions than the latest stable release. You can do so by specifying the version using environment variables.
+
+**Install Latest Dev Version**
+
+To install the latest development build of fvm and fluvio:
 
 ```bash
-$ curl -fsS https://hub.infinyon.cloud/install/install.sh | VERSION=latest bash
+curl -fsS https://github.com/fluvio-community/fluvio/raw/master/install.sh | FVM_VERSION=dev bash
 ```
 
-**Install Specific Version**
+**Install Specific Fluvio Version**
 
 ```bash
-$ curl -fsS https://hub.infinyon.cloud/install/install.sh | VERSION=x.y.z bash
+curl -fsS https://github.com/fluvio-community/fluvio/raw/master/install.sh | FLUVIO_VERSION=x.y.z bash
+```
+
+**Install Specific FVM Version**
+
+```bash
+curl -fsS https://github.com/fluvio-community/fluvio/raw/master/install.sh | FVM_VERSION=v0.18.1 bash
 ```
 
 #### Check Fluvio Core Documentation
