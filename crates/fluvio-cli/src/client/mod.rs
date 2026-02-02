@@ -1,6 +1,5 @@
 mod topic;
 mod consume;
-mod hub;
 mod produce;
 mod partition;
 mod tableformat;
@@ -57,7 +56,6 @@ mod cmd {
     use super::topic::TopicCmd;
     use super::partition::PartitionCmd;
     use super::tableformat::TableFormatCmd;
-    use super::hub::HubCmd;
 
     #[async_trait]
     pub trait ClientCmd: Sized {
@@ -137,10 +135,6 @@ mod cmd {
         #[command(subcommand, name = "table-format", visible_alias = "tf")]
         TableFormat(TableFormatCmd),
 
-        /// Work with the SmartModule Hub
-        #[command(subcommand, name = "hub")]
-        Hub(HubCmd),
-
         /// Manage and view Consumers
         #[command(subcommand, name = "consumer")]
         Consumer(ConsumerCmd),
@@ -179,9 +173,6 @@ mod cmd {
                 }
                 Self::TableFormat(tableformat) => {
                     tableformat.process(out, target).await?;
-                }
-                Self::Hub(hub) => {
-                    hub.process(out, target).await?;
                 }
                 Self::Consumer(consumer) => {
                     consumer.process(out, target).await?;

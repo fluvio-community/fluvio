@@ -28,7 +28,6 @@ openssl = { workspace = true, features = ["vendored"] } # cargo-generate require
 
 
 fluvio = { workspace = true }
-fluvio-hub-util = { workspace = true }
 fluvio-future = { workspace = true, features = ["subscriber"]}
 fluvio-smartengine = { workspace = true, features = ["transformation"] }
 fluvio-extension-common = { workspace = true, features = ["target"] }

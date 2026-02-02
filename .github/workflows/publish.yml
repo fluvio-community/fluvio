@@ -65,9 +65,15 @@ jobs:
     env:
       TGT_SHA: ${{ needs.setup.outputs.pub_sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.setup.outputs.pub_sha }}
+      - name: Login to github container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish latest development Fluvio Image
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -94,7 +100,7 @@ jobs:
       BPKG_TOKEN: ${{ secrets.BPKG_TOKEN }}
       TGT_SHA: ${{needs.setup.outputs.pub_sha }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ needs.setup.outputs.pub_sha }}
       - name: Install fluvio-package
@@ -146,7 +152,7 @@ jobs:
       TGT_SHA: ${{ needs.setup.outputs.pub_sha }}
     steps:
       - name: Checkout ${{needs.setup.outputs.pub_sha }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{needs.setup.outputs.pub_sha }}
       - name: Install stable Fluvio CLI

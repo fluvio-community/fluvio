@@ -29,14 +29,10 @@ use fluvio_sc_schema::topic::Bounds;
 use fluvio_sc_schema::topic::Deduplication;
 use fluvio_sc_schema::topic::Filter;
 use fluvio_sc_schema::topic::Transform;
-use fluvio_hub_util as hubutil;
-use hubutil::cmd::get_hub_access;
 
 use fluvio::Fluvio;
 use fluvio::FluvioAdmin;
 use fluvio::metadata::topic::TopicSpec;
-use crate::client::hub::download_cluster;
-use crate::client::hub::download_local;
 use crate::CliError;
 
 const DEFAULT_DEDUP_FILTER: &str = "fluvio/dedup-bloom-filter@0.1.0";
@@ -247,11 +243,10 @@ impl CreateTopicOpt {
                 .next();
 
             if sm.is_none() {
-                println!("deduplication filter not found, downloading");
-                let access = get_hub_access(&None)?;
-                let pkgname = DEFAULT_DEDUP_FILTER;
-                let pkgfile = download_local(pkgname, &access, None).await?;
-                download_cluster(admin, &pkgfile).await?;
+                return Err(CliError::InvalidArg(format!(
+                    "Deduplication SmartModule filter '{DEFAULT_DEDUP_FILTER}' not found. Please build and add to the cluster the smartmodule from https://github.com/infinyon/dedup-bloom-filter."
+                ))
+                .into());
             }
 
             let deduplication =

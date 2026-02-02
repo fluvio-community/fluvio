@@ -19,6 +19,7 @@ members = [
     "crates/fluvio-compression",
     "crates/fluvio-controlplane",
     "crates/fluvio-controlplane-metadata",
+    "crates/fluvio-artifacts-util",
     "crates/fluvio-hub-util",
     "crates/fluvio-hub-protocol",
     "crates/fluvio-extension-common",
@@ -63,7 +64,7 @@ resolver = "2"
 version = "0.50.2"
 edition = "2024"
 license = "Apache-2.0"
-repository = "https://github.com/infinyon/fluvio"
+repository = "https://github.com/fluvio-community/fluvio"
 authors = ["Fluvio Contributors <team@fluvio.io>"]
 
 [workspace.dependencies]
@@ -129,6 +130,7 @@ once_cell = "1.7.2"
 openssl = { version = "0.10", default-features = false }
 parking_lot = { version = "0.12.3", default-features = false }
 lib-cargo-crate = "0.2.1"
+octocrab = { version = "0.46", default-features = false }
 pin-project = "1.1.0"
 pin-utils = "0.1.0"
 portpicker = "0.1.1"
@@ -173,12 +175,13 @@ url = "2.5"
 uuid = { version = "1.1", features = ["serde", "v4"] }
 wasm-bindgen-test = "0.3.50"
 wasm-bindgen = "0.2.100"
-wasi-common = { version = "34.0.1" }
-wasmtime = { version = "34.0.1" }
+wasi-common = { version = "36.0.5" }
+wasmtime = { version = "36.0.5" }
 wasmparser = "0.235.0"
 web-time = "1.1.0"
 which = "8.0"
 x509-parser = "0.17.0"
+zip = "7"
 
 # External fluvio dependencies
 fluvio_ws_stream_wasm = "0.7.0"
@@ -202,6 +205,7 @@ fluvio-cli-common = { path = "crates/fluvio-cli-common" }
 fluvio-connector-package = { path = "crates/fluvio-connector-package/" }
 fluvio-controlplane = { path = "crates/fluvio-controlplane" }
 fluvio-extension-common = { path = "crates/fluvio-extension-common", default-features = false }
+fluvio-artifacts-util = { path = "crates/fluvio-artifacts-util" }
 fluvio-hub-util = { path = "crates/fluvio-hub-util" }
 fluvio-service = { path = "crates/fluvio-service" }
 fluvio-storage = { path = "crates/fluvio-storage" }

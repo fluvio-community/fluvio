@@ -1,15 +1,13 @@
 use anyhow::Result;
 use cargo_builder::package::PackageOption;
 use clap::Parser;
+
 use fluvio_cli_common::version_cmd::BasicVersionCmd;
 
 use crate::build::BuildCmd;
 use crate::generate::GenerateCmd;
 use crate::deploy::DeployCmd;
 use crate::test::TestCmd;
-use crate::publish::PublishCmd;
-use crate::set_public::SetPublicCmd;
-use crate::hub::HubCmd;
 
 /// Connector Development Kit
 #[derive(Debug, Parser)]
@@ -18,13 +16,7 @@ pub enum CdkCommand {
     Test(TestCmd),
     Generate(GenerateCmd),
     Deploy(DeployCmd),
-    Publish(PublishCmd),
     Version(BasicVersionCmd),
-    #[command(subcommand)]
-    Hub(HubCmd),
-
-    #[command(name = "set-public")]
-    SetPublic(SetPublicCmd),
 }
 
 impl CdkCommand {
@@ -33,11 +25,8 @@ impl CdkCommand {
             CdkCommand::Build(opt) => opt.process(),
             CdkCommand::Test(opt) => opt.process(),
             CdkCommand::Deploy(opt) => opt.process(),
-            CdkCommand::Publish(opt) => opt.process(),
-            CdkCommand::SetPublic(opt) => opt.process(),
             CdkCommand::Generate(opt) => opt.process(),
             CdkCommand::Version(opt) => opt.process("CDK"),
-            CdkCommand::Hub(opt) => opt.process(),
         }
     }
 }

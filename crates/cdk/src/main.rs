@@ -3,11 +3,8 @@ mod generate;
 mod build;
 mod test;
 mod deploy;
-mod publish;
-mod set_public;
 
 pub(crate) mod utils;
-mod hub;
 
 fn main() -> anyhow::Result<()> {
     use clap::Parser;

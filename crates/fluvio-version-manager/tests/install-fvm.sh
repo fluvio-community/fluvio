@@ -40,7 +40,7 @@ main() {
     _dir="$(mktemp -d 2>/dev/null || ensure mktemp -d -t fluvio-install)"
     _temp_file="${_dir}/fvm.zip"
     # todo: switch to hub/or fluvio packages download w/ checksum verification
-    _url="https://github.com/infinyon/fluvio/releases/download/dev/fvm-${_target}.zip"
+    _url="https://github.com/fluvio-community/fluvio/releases/download/dev/fvm-${_target}.zip"
 
     # ".zip" will be removed in switch to hub/fluviopkgs
     downloader "${_url}" "${_temp_file}.zip"
@@ -454,7 +454,7 @@ abort_prompt_issue() {
     err ""
     err "If you believe this is a bug (or just need help),"
     err "please feel free to file an issue on Github ❤️"
-    err "    https://github.com/infinyon/fluvio/issues/new"
+    err "    https://github.com/fluvio-community/fluvio/issues/new"
     exit 1
 }
 

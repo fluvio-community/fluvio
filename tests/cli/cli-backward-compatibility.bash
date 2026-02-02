@@ -28,7 +28,7 @@ for version in $versions; do
     # Install current version on the cluster
     $FLUVIO_BIN cluster start
     # Install old version of the CLI
-    curl -fsS https://hub.infinyon.cloud/install/install.sh?ctx=ci | VERSION=$version bash
+    curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | VERSION=$version bash
     # Run the tests
     CLI_VERSION=$version SKIP_SETUP=true make cli-platform-cross-version-test
 

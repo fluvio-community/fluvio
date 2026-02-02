@@ -74,7 +74,7 @@ jobs:
       TOPIC: foobar
     steps:
       - name: Checkout ${{ needs.setup.outputs.pub_sha }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.setup.outputs.pub_sha }}
       - name: Set up K3d for Ubuntu
@@ -85,7 +85,7 @@ jobs:
         if: ${{ matrix.cluster_type == 'k8' }}
         run: ./k8-util/cluster/reset-k3d.sh
       - name: Setup Fluvio
-        uses: infinyon/fluvio/.github/actions/setup-fluvio@master
+        uses: fluvio-community/fluvio/.github/actions/setup-fluvio@master
         with:
           version: latest
       - name: Install Local Fluvio cluster
@@ -115,7 +115,7 @@ jobs:
         timeout-minutes: 5
         run: fluvio cluster diagnostics
       - name: Upload diagnostics
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         timeout-minutes: 5
         if: ${{ !success() }}
         with:
@@ -146,7 +146,7 @@ jobs:
       FLV_SOCKET_WAIT: 600
     steps:
       - name: Checkout ${{ needs.setup.outputs.pub_sha }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.setup.outputs.pub_sha }}
       - name: Setup K3d
@@ -165,7 +165,7 @@ jobs:
         timeout-minutes: 5
         run: ~/.fluvio/bin/fluvio cluster diagnostics
       - name: Upload diagnostics
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         timeout-minutes: 5
         if: ${{ !success() }}
         with:
@@ -192,7 +192,7 @@ jobs:
         version: [latest]
     steps:
       - name: Checkout ${{ needs.setup.outputs.pub_sha }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.setup.outputs.pub_sha }}
       - name: Set the expected fluvio version
@@ -206,7 +206,7 @@ jobs:
 
       - name: Curl Install - latest
         run: |
-          curl -fsS https://hub.infinyon.cloud/install/install.sh | \
+          curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | \
             FLUVIO_VERSION=${{ matrix.version }} bash | \
             tee /tmp/installer.version
 
@@ -235,7 +235,7 @@ jobs:
         cli_version: [stable, latest]
     steps:
       - name: Checkout ${{ needs.setup.outputs.pub_sha }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.setup.outputs.pub_sha }}
       - name: Setup BATS

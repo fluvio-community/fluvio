@@ -95,86 +95,15 @@ setup_file() {
     assert_success
 }
 
-@test "Pack connector" {
-    # Pack when package meta doesn't exist
-    cd $CONNECTOR_DIR
-    run $CDK_BIN publish --pack --target x86_64-unknown-linux-gnu
-    assert_success
-
-    # Pack when package meta exists
-    cd $CONNECTOR_DIR
-    run $CDK_BIN publish --pack --target x86_64-unknown-linux-gnu
-    assert_success
-}
-
-@test "Packs connector with specific README.md" {
-    # Creates a directory to store the dummy readme
-    cd $CONNECTOR_DIR
-
-    rm -rf ../testing
-    mkdir ../testing
-    echo "# Testing Connector Readme" > ../testing/README.md
-
-    run $CDK_BIN publish --pack --target x86_64-unknown-linux-gnu --readme ../testing/README.md
-    assert_success
-
-    # Ensure the correct path is added
-    cat ./.hub/package-meta.yaml | grep '../../testing/README.md'
-    assert_success
-
-    # clean up
-    rm -r ../testing
-}
-
-@test "Run connector with --ipkg" {
-    # create package meta doesn't exist
-    cd $CONNECTOR_DIR
-    run $CDK_BIN publish --pack --target x86_64-unknown-linux-gnu
-    assert_success
-
-    IPKG_DIR=$TEST_DIR/ipkg
-
-    mkdir $IPKG_DIR
-    cp .hub/json-test-connector-0.1.0.ipkg $IPKG_DIR
-    cp sample-config.yaml $IPKG_DIR
-
-    cd $IPKG_DIR
-
-    run $CDK_BIN deploy start --ipkg json-test-connector-0.1.0.ipkg --config sample-config.yaml
-    assert_success
-    assert_output --partial "Connector runs with process id"
-
-    run $CDK_BIN deploy shutdown --name my-json-test-connector
-    assert_success
-}
-
-@test "Run connector with --ipkg V2" {
-    # create package meta doesn't exist
-    cd $CONNECTOR_DIR
-    run $CDK_BIN publish --pack --target x86_64-unknown-linux-gnu
-    assert_success
-
-    IPKG_DIR=$TEST_DIR/ipkg_v2
-
-    mkdir $IPKG_DIR
-    cp .hub/json-test-connector-0.1.0.ipkg $IPKG_DIR
-    cp sample-config-v2.yaml $IPKG_DIR
-
-    cd $IPKG_DIR
-
-    run $CDK_BIN deploy start --ipkg json-test-connector-0.1.0.ipkg --config sample-config-v2.yaml
-    assert_success
-    assert_output --partial "Connector runs with process id"
-
-    run $CDK_BIN deploy shutdown --name my-json-test-connector
-    assert_success
-}
 
 @test "Generate and Builds a Sink Connector Package" {
     export SINK_CONN_NAME="$PROJECT_NAME_PREFIX-my-sink-conn"
 
     # move into test dir
     cd $TEST_DIR
+
+    # ensure no leftover directory from previous runs
+    rm -rf "$SINK_CONN_NAME"
 
     # generate a sink connector
     run $CDK_BIN generate $SINK_CONN_NAME \
@@ -197,6 +126,9 @@ setup_file() {
 
     # move into test dir
     cd $TEST_DIR
+
+    # ensure no leftover directory from previous runs
+    rm -rf "$SOURCE_CONN_NAME"
 
     # generate a source connector
     run $CDK_BIN generate $SOURCE_CONN_NAME \

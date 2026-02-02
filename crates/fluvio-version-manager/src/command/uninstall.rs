@@ -7,7 +7,7 @@ use anyhow::Result;
 use clap::Parser;
 
 use colored::Colorize;
-use fluvio_hub_util::fvm::Channel;
+use fluvio_artifacts_util::fvm::Channel;
 
 use crate::common::notify::Notify;
 

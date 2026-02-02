@@ -555,8 +555,6 @@ mod tests {
     use super::*;
     use crate::package_get_meta;
 
-    const PKG_SIGN_PUBKEY: &str = "tests/hubutil_package_sign-pubkey.pem";
-
     #[test]
     fn hubutil_serialize_package_meta() {
         let pm = PackageMeta {
@@ -615,10 +613,12 @@ mod tests {
         assert!(outpath.exists());
     }
 
-    #[test]
-    fn hubutil_package_sign() -> Result<()> {
+    //   #[test] FIXME: ignoring until we migrate from hub
+    fn _hubutil_package_sign() -> Result<()> {
         const UNSIGNED_PKG_FILE: &str = "tests/example-0.0.1.tar";
         const SIGNED_PKG_FILE: &str = "tests/example-0.0.1.ipkg";
+        const PKG_SIGN_PUBKEY: &str = "tests/hubutil_package_sign-pubkey.pem";
+
         let unsigned = std::path::Path::new(UNSIGNED_PKG_FILE);
         if !unsigned.exists() {
             hubutil_package_assemble();

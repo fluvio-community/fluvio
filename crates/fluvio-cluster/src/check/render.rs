@@ -7,4 +7,4 @@ use crate::{
     render::{ProgressRenderedText, ProgressRenderer},
 };
 
-const ISSUE_URL: &str = "https://github.com/infinyon/fluvio/issues/new/choose";
+const ISSUE_URL: &str = "https://github.com/fluvio-community/fluvio/issues/new/choose";

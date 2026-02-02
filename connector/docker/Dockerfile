@@ -15,7 +15,7 @@ WORKDIR /home/fluvio
 
 
 # install fluvio
-RUN curl -fsS https://hub.infinyon.cloud/install/install.sh | bash
+RUN curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | bash
 RUN ls -la /home/fluvio/.fluvio/bin
 ENV PATH="/home/fluvio/.fluvio/bin:$PATH"
 RUN export PATH

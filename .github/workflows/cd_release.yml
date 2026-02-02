@@ -26,7 +26,7 @@ jobs:
     name: Release success check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Login GH CLI
         run: gh auth login --with-token < <(echo ${{ secrets.GITHUB_TOKEN }})
       - name: Get status of latest RELEASE_CHECK run
@@ -53,7 +53,7 @@ jobs:
         version: [semver]
         # version: [none, stable, semver]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set the expected fluvio version
         run: |
           if [[ -z "${{ env.USE_VERSION }}" ]]; then
@@ -74,7 +74,7 @@ jobs:
         run: echo "VERSION=$EXPECTED_VERSION" | tee -a $GITHUB_ENV
       - name: Curl Install - FLUVIO_VERSION=${{ env.VERSION }}
         run: |
-          curl -fsS https://hub.infinyon.cloud/install/install.sh | \
+          curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | \
             FLUVIO_VERSION=${{ env.VERSION }} bash | \
             tee /tmp/installer.version
       - name: Verify installer output
@@ -99,7 +99,7 @@ jobs:
     env:
       FLV_SOCKET_WAIT: 600
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup K3d
         if: ${{ matrix.cluster_type == 'k8' }}
         run: curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} bash
@@ -119,7 +119,7 @@ jobs:
 
       - run: echo "VERSION=$EXPECTED_VERSION" | tee -a $GITHUB_ENV
       - name: Setup Fluvio
-        uses: infinyon/fluvio/.github/actions/setup-fluvio@master
+        uses: fluvio-community/fluvio/.github/actions/setup-fluvio@master
       - name: Start cluster
         timeout-minutes: 10
         run: |
@@ -131,7 +131,7 @@ jobs:
         run: |
           fluvio cluster diagnostics
       - name: Upload diagnostics
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         timeout-minutes: 5
         if: ${{ !success() }}
         with:
@@ -149,7 +149,7 @@ jobs:
       FLV_SOCKET_WAIT: 600
       FLV_DISPATCHER_WAIT: 300
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Setup K3d
         run: curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} bash
       - name: Create K3d cluster
@@ -164,7 +164,7 @@ jobs:
           PREV_STABLE_VERSION=$(gh release list | awk '{print $1}' | sed 's/^dev//' |  grep "v" | sed 's/^v//' | head -2 | tail -1)
 
       - name: Setup Fluvio
-        uses: infinyon/fluvio/.github/actions/setup-fluvio@master
+        uses: fluvio-community/fluvio/.github/actions/setup-fluvio@master
         with:
           version: ${{ env.PREV_STABLE_VERSION }}
 
@@ -196,7 +196,7 @@ jobs:
         timeout-minutes: 5
         run: ~/.fluvio/bin/fluvio cluster diagnostics
       - name: Upload diagnostics
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         timeout-minutes: 5
         if: ${{ !success() }}
         with:

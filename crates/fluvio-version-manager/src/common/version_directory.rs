@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use anyhow::{bail, Result};
 
-use fluvio_hub_util::fvm::{Artifact, Channel, PackageSet};
+use fluvio_artifacts_util::fvm::{Artifact, Channel, PackageSet};
 use semver::Version;
 
 use crate::common::manifest::{PACKAGE_SET_MANIFEST_FILENAME, VersionManifest};
@@ -168,7 +168,7 @@ impl VersionDirectory {
                         version,
                         name: va.name.clone(),
                         download_url: String::from("N/A"),
-                        sha256_url: String::from("N/A"),
+                        sha256_digest: None,
                     })
                 })
                 .collect();
@@ -198,7 +198,7 @@ mod tests {
     use fs_extra::dir::{copy as copy_dir, CopyOptions};
     use tempfile::TempDir;
 
-    use fluvio_hub_util::sha256_digest;
+    use fluvio_artifacts_util::sha256_digest;
 
     use crate::common::manifest::VersionedArtifact;
     use crate::common::settings::tests::{create_fvm_dir, delete_fvm_dir};
@@ -412,19 +412,19 @@ mod tests {
                     name: String::from("fluvio"),
                     version: Version::parse("0.11.8").unwrap(),
                     download_url: String::from("N/A"),
-                    sha256_url: String::from("N/A"),
+                    sha256_digest: None,
                 },
                 Artifact {
                     name: String::from("fluvio-cloud"),
                     version: Version::parse("0.2.22").unwrap(),
                     download_url: String::from("N/A"),
-                    sha256_url: String::from("N/A"),
+                    sha256_digest: None,
                 },
                 Artifact {
                     name: String::from("cdk"),
                     version: Version::parse("0.11.8").unwrap(),
                     download_url: String::from("N/A"),
-                    sha256_url: String::from("N/A"),
+                    sha256_digest: None,
                 },
             ],
         };

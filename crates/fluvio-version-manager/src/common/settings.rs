@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use anyhow::{Error, Result};
 use serde::{Deserialize, Serialize};
 
-use fluvio_hub_util::fvm::Channel;
+use fluvio_artifacts_util::fvm::Channel;
 
 use super::manifest::VersionManifest;
 use super::workdir::fvm_workdir_path;

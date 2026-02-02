@@ -82,8 +82,6 @@ spec:
                                     type: string
                                   source:
                                     type: boolean
-                              source:
-                                type: boolean
                         remote:
                           type: object
                           required: ["homeCluster","homeSpus"]

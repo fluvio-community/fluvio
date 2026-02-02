@@ -3,9 +3,6 @@ mod cmd;
 mod generate;
 mod test;
 mod load;
-mod publish;
-mod hub;
-mod set_public;
 mod clean;
 
 use std::path::PathBuf;

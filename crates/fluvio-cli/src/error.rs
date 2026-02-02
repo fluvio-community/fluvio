@@ -39,9 +39,6 @@ pub enum CliError {
     #[error("Http Error: {0}")]
     HttpError(#[from] fluvio_cli_common::error::HttpError),
 
-    #[error("Package error: {0}")]
-    PackageError(String),
-
     #[error("Invalid argument: {0}")]
     InvalidArg(String),
     #[error("Unknown error: {0}")]

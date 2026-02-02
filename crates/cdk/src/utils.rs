@@ -35,11 +35,13 @@ pub mod build {
 pub mod verify {
     use std::path::Path;
     use std::ffi::OsStr;
-    use crate::publish::CONNECTOR_TOML;
+
     use fluvio_connector_package::metadata::ConnectorMetadata;
 
     /// check that binary indicated in Connector.toml is in the Package manifest
-    pub fn connector_ipkg(ipkg_file: &str) -> Result<(), String> {
+    pub fn _connector_ipkg(ipkg_file: &str) -> Result<(), String> {
+        const CONNECTOR_TOML: &str = "Connector.toml";
+
         tracing::debug!(pkg = ipkg_file, "reading connector metadata from ipkg file");
         let package_meta = fluvio_hub_util::package_get_meta(ipkg_file)
             .map_err(|err| format!("missing package metadata: {err}"))?;
@@ -87,7 +89,7 @@ fn test_binary_in_manifest() {
     ];
 
     for (ipkg_file, opt_err_str) in ipkg_test_set {
-        let result = verify::connector_ipkg(ipkg_file);
+        let result = verify::_connector_ipkg(ipkg_file);
         println!("{result:?}");
         if let Some(err_str) = opt_err_str {
             assert!(result.is_err());

@@ -1,15 +1,13 @@
 use anyhow::Result;
 use cargo_builder::package::PackageOption;
 use clap::Parser;
+
 use fluvio_cli_common::version_cmd::BasicVersionCmd;
 
 use crate::build::{BuildCmd, BUILD_TARGET};
 use crate::generate::GenerateCmd;
 use crate::test::TestCmd;
 use crate::load::LoadCmd;
-use crate::publish::PublishCmd;
-use crate::hub::HubCmd;
-use crate::set_public::SetPublicOpt;
 use crate::clean::CleanCmd;
 
 /// SmartModule Development Kit utility
@@ -21,14 +19,6 @@ pub enum SmdkCommand {
     Generate(GenerateCmd),
     Test(TestCmd),
     Load(LoadCmd),
-    /// Publish SmartModule to Hub
-    Publish(PublishCmd),
-    /// Hub options
-    #[command(subcommand, hide = true)]
-    Hub(HubCmd),
-    /// Set package as public
-    #[command(name = "set-public")]
-    SetPublic(SetPublicOpt),
     /// Print smdk version information
     Version(BasicVersionCmd),
     /// Cleans the current directory
@@ -42,9 +32,6 @@ impl SmdkCommand {
             SmdkCommand::Generate(opt) => opt.process(),
             SmdkCommand::Test(opt) => opt.process(),
             SmdkCommand::Load(opt) => opt.process(),
-            SmdkCommand::Publish(opt) => opt.process(),
-            SmdkCommand::Hub(opt) => opt.process(),
-            SmdkCommand::SetPublic(opt) => opt.process(),
             SmdkCommand::Clean(opt) => opt.process(),
             SmdkCommand::Version(opt) => opt.process("SMDK"),
         }
