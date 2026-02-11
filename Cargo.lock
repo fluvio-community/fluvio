@@ -492,7 +492,7 @@ dependencies = [
  "bitflags 2.9.1",
  "cexpr",
  "clang-sys",
- "itertools 0.12.1",
+ "itertools 0.10.5",
  "lazy_static",
  "lazycell",
  "log",
@@ -4497,15 +4497,6 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
-dependencies = [
- "either",
-]
-
-[[package]]
-name = "itertools"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
@@ -4598,9 +4589,8 @@ dependencies = [
 
 [[package]]
 name = "k8-client"
-version = "14.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc82268c81c303bf069b7323a29f384a0cd1411db7fd1eb00991abfdddcdd566"
+version = "15.0.1"
+source = "git+https://github.com/mujin/k8-api.git?branch=master#d3426b20ae776fdeb2a6db8e99ed294cb11e882a"
 dependencies = [
  "anyhow",
  "async-channel",
@@ -4630,8 +4620,7 @@ dependencies = [
 [[package]]
 name = "k8-config"
 version = "3.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3736cb93ace782ea0f88f586435f71d312540a6acb11d3f34bc67ebc54d04e0"
+source = "git+https://github.com/mujin/k8-api.git?branch=master#d3426b20ae776fdeb2a6db8e99ed294cb11e882a"
 dependencies = [
  "dirs 5.0.1",
  "hostfile",
@@ -4645,19 +4634,16 @@ dependencies = [
 [[package]]
 name = "k8-diff"
 version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef435d912eeb448129d7ae11d3c497691f1f383d2d2ff1dff4365a81c7bd4f3b"
+source = "git+https://github.com/mujin/k8-api.git?branch=master#d3426b20ae776fdeb2a6db8e99ed294cb11e882a"
 dependencies = [
  "serde",
  "serde_json",
- "tracing",
 ]
 
 [[package]]
 name = "k8-metadata-client"
-version = "8.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "92b4c9465417ccfae7dd534d3c3e17e457cbdc3672ae6e9279406dbe5bb58b1f"
+version = "9.0.0"
+source = "git+https://github.com/mujin/k8-api.git?branch=master#d3426b20ae776fdeb2a6db8e99ed294cb11e882a"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4673,9 +4659,8 @@ dependencies = [
 
 [[package]]
 name = "k8-types"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a03d75bcb5555871dcffa40538fee4e59d38e3d21457c7c19108a31a76a69122"
+version = "0.10.0"
+source = "git+https://github.com/mujin/k8-api.git?branch=master#d3426b20ae776fdeb2a6db8e99ed294cb11e882a"
 dependencies = [
  "serde",
  "serde_json",

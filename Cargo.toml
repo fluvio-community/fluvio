@@ -187,10 +187,10 @@ fluvio-future = { version = "0.8.3", default-features = false }
 fluvio-helm = { version = "0.4.1" }
 flv-tls-proxy = { version = "0.12.0" }
 flv-util = { version = "0.5.2", default-features = false }
-k8-client = { version = "14.0.0" }
-k8-config = { version = "3.0.0" }
-k8-types = { version = "0.9.0" }
-k8-diff = { version = "0.1.2" }
+k8-client = { git = "https://github.com/mujin/k8-api.git", branch = "master" }
+k8-config = { git = "https://github.com/mujin/k8-api.git", branch = "master" }
+k8-types = { git = "https://github.com/mujin/k8-api.git", branch = "master" }
+k8-diff = { git = "https://github.com/mujin/k8-api.git", branch = "master" }
 trybuild = { branch = "check_option", git = "https://github.com/infinyon/trybuild" }
 
 # Internal fluvio dependencies
