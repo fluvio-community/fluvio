@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 use std::ops::Div;
 use std::ops::Rem;
@@ -22,6 +23,7 @@ pub(crate) struct Cleaner {
     replica_config: Arc<SharedReplicaConfig>,
     segments: Arc<SharedSegments>,
     replica_size: Arc<ReplicaSize>,
+    short_circuit: Arc<AtomicBool>,
     end_event: Arc<StickyEvent>,
 }
 
@@ -31,6 +33,7 @@ impl Cleaner {
         replica_config: Arc<SharedReplicaConfig>,
         segments: Arc<SharedSegments>,
         replica_size: Arc<ReplicaSize>,
+        short_circuit: Arc<AtomicBool>,
     ) -> Arc<Self> {
         let end_event = StickyEvent::shared();
         let cleaner = Arc::new(Cleaner {
@@ -38,6 +41,7 @@ impl Cleaner {
             replica_config,
             segments,
             replica_size,
+            short_circuit,
             end_event,
         });
 
@@ -107,6 +111,11 @@ impl Cleaner {
 
             let read = self.segments.read().await;
             self.replica_size.store_prev(read.occupied_memory());
+
+            // Reset short_circuit so writes can be retried now that space is freed
+            if self.short_circuit.swap(false, Ordering::Relaxed) {
+                info!("cleared short_circuit after freeing space");
+            }
         }
     }
 
@@ -128,6 +137,11 @@ impl Cleaner {
             self.segments.remove_segments(&expired_segments).await;
             let read = self.segments.read().await;
             self.replica_size.store_prev(read.occupied_memory());
+
+            // Reset short_circuit so writes can be retried now that space is freed
+            if self.short_circuit.swap(false, Ordering::Relaxed) {
+                info!("cleared short_circuit after TTL cleanup");
+            }
         }
     }
 }
@@ -138,6 +152,7 @@ mod tests {
     use std::env::temp_dir;
     use std::ops::AddAssign;
     use std::sync::Arc;
+    use std::sync::atomic::AtomicBool;
     use std::time::Duration;
 
     use anyhow::Result;
@@ -286,6 +301,7 @@ mod tests {
             replica_config: replica_config.shared(),
             segments,
             replica_size,
+            short_circuit: Arc::new(AtomicBool::new(false)),
             end_event: StickyEvent::shared(),
         }
     }

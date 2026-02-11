@@ -1,7 +1,7 @@
 use std::cmp::min;
 use std::{fmt, mem};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
 use tracing::{debug, trace, warn, instrument, info};
 use async_trait::async_trait;
@@ -40,7 +40,7 @@ pub struct FileReplica {
     commit_checkpoint: CheckPoint,
     cleaner: Arc<Cleaner>,
     size: Arc<ReplicaSize>,
-    short_circuit: bool, // if this is true, last append failed, should not append again
+    short_circuit: Arc<AtomicBool>, // set on write failure, cleared by cleaner after freeing space
     max_request_size: usize,
     max_segment_size: usize,
 }
@@ -275,11 +275,14 @@ impl FileReplica {
         let size = Arc::new(ReplicaSize::default());
         size.store_active(active_segment.occupied_memory());
 
+        let short_circuit = Arc::new(AtomicBool::new(false));
+
         let cleaner = Cleaner::start_new(
             storage_config,
             shared_config.clone(),
             segments.clone(),
             size.clone(),
+            short_circuit.clone(),
         );
 
         let max_request_size = shared_config.max_request_size.get_consistent() as usize;
@@ -294,7 +297,7 @@ impl FileReplica {
             commit_checkpoint,
             cleaner,
             size,
-            short_circuit: false,
+            short_circuit,
             max_request_size,
             max_segment_size,
         })
@@ -404,7 +407,7 @@ impl FileReplica {
 
     #[instrument(skip(self, item))]
     async fn write_batch<R: BatchRecords>(&mut self, item: &mut Batch<R>) -> Result<()> {
-        if self.short_circuit {
+        if self.short_circuit.load(Ordering::Relaxed) {
             return Err(StorageError::ShortCircuited.into());
         }
 
@@ -419,7 +422,7 @@ impl FileReplica {
                             Ok(true) => {}
                             Ok(false) => {
                                 warn!("failed to append even after rollver");
-                                self.short_circuit = true;
+                                self.short_circuit.store(true, Ordering::Relaxed);
                                 return Err(StorageError::Other(
                                     "failed to append even after rollver".to_owned(),
                                 )
@@ -427,21 +430,21 @@ impl FileReplica {
                             }
                             Err(err) => {
                                 warn!("failed to append after rollver: {:#?}", err);
-                                self.short_circuit = true;
+                                self.short_circuit.store(true, Ordering::Relaxed);
                                 return Err(err);
                             }
                         }
                     }
                     Err(err) => {
                         warn!("failed to rollver: {:#?}", err);
-                        self.short_circuit = true;
+                        self.short_circuit.store(true, Ordering::Relaxed);
                         return Err(err);
                     }
                 }
             }
             Err(err) => {
                 warn!("failed to write to active segment: {:#?}", err);
-                self.short_circuit = true;
+                self.short_circuit.store(true, Ordering::Relaxed);
                 return Err(err);
             }
         }
