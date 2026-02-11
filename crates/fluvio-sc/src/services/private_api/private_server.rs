@@ -45,7 +45,14 @@ use crate::stores::spu::SpuLocalStorePolicy;
 use crate::stores::spu::SpuSpec;
 use crate::stores::actions::WSAction;
 
-const HEALTH_DURATION: u64 = 90;
+const DEFAULT_HEALTH_DURATION: u64 = 90;
+
+fn health_duration() -> u64 {
+    std::env::var("FLUVIO_SC_HEALTH_TIMEOUT_SECS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(DEFAULT_HEALTH_DURATION)
+}
 
 #[derive(Debug)]
 pub struct ScInternalService<C> {
@@ -108,6 +115,8 @@ where
 
         health_check.update(spu_id, true).await;
 
+        info!(spu_id, health_timeout_secs = health_duration(), "SPU connected");
+
         if let Err(err) = dispatch_loop(context, spu_id, api_stream, sink).await {
             error!("error with SPU <{}>, error: {}", spu_id, err);
         }
@@ -138,7 +147,7 @@ where
 
     // send initial changes
 
-    let mut health_check_timer = sleep(Duration::from_secs(HEALTH_DURATION));
+    let mut health_check_timer = sleep(Duration::from_secs(health_duration()));
 
     loop {
         use tokio::select;
@@ -183,7 +192,7 @@ where
                             }
                         }
                         // reset timer
-                        health_check_timer = sleep(Duration::from_secs(HEALTH_DURATION));
+                        health_check_timer = sleep(Duration::from_secs(health_duration()));
                         trace!("health check reset");
                     } else {
                         debug!(spu_id,"no message content, ending processing loop");
