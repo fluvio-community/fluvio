@@ -41,8 +41,6 @@ pub enum CliError {
 
     #[error("Invalid argument: {0}")]
     InvalidArg(String),
-    #[error("Unknown error: {0}")]
-    Other(String),
     #[error("{0}")]
     CollectedError(String),
     #[error("Unexpected Infallible error")]
@@ -62,6 +60,4 @@ pub enum CliError {
     #[cfg(feature = "smartengine")]
     #[error("SmartModuleEngine config: {0}")]
     SmartModuleConfigBuilder(#[from] fluvio_smartengine::SmartModuleConfigBuilderError),
-    #[error("Hub error: {0}")]
-    HubError(String),
 }

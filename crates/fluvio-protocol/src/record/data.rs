@@ -281,7 +281,10 @@ impl<R: BatchRecords> RecordSet<R> {
     /// this is next offset to be fetched
     pub fn last_offset(&self) -> Option<Offset> {
         self.batches
-            .last()
+            .iter()
+            .rev()
+            // find last valid batch
+            .find(|batch| batch.validate_decoding())
             .map(|batch| batch.computed_last_offset())
     }
 
@@ -726,6 +729,32 @@ mod test {
         let decoded_batches =
             RecordSet::<MemoryRecords>::decode_from(&mut Cursor::new(out), 0).expect("decoding");
         assert_eq!(decoded_batches.batches.len(), 2);
+    }
+
+    #[test]
+    fn test_last_offset_ignores_invalid_trailing_batch() {
+        use bytes::Bytes;
+
+        use crate::record::batch::{Batch, RawRecords, BATCH_HEADER_SIZE};
+
+        let mut valid = Batch::<RawRecords>::default();
+        valid.base_offset = 10;
+        valid.header.last_offset_delta = 1; // records_len() == 2
+        valid.mut_records().0 = Bytes::from_static(&[1, 2, 3, 4]);
+        valid.batch_len = (BATCH_HEADER_SIZE + valid.records().0.len()) as i32;
+        assert!(valid.validate_decoding());
+
+        let mut invalid = Batch::<RawRecords>::default();
+        invalid.base_offset = 12;
+        invalid.header.last_offset_delta = 10;
+        invalid.mut_records().0 = Bytes::from_static(&[9, 9, 9]);
+        invalid.batch_len = (BATCH_HEADER_SIZE + invalid.records().0.len() + 1) as i32; // mismatch
+        assert!(!invalid.validate_decoding());
+
+        let set = RecordSet::<RawRecords>::default().add(valid).add(invalid);
+
+        // computed_last_offset = base_offset + records_len
+        assert_eq!(set.last_offset(), Some(12));
     }
 
     #[test]

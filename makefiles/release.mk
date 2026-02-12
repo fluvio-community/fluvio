@@ -108,7 +108,7 @@ docker-push-manifest-dev: docker-create-manifest-dev docker-push-manifest
 
 # Uses $(VERSION)
 curl-install-fluvio:
-	curl -fsS https://hub.infinyon.cloud/install/install.sh?ctx=ci | bash
+	curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | bash
 
 install-fluvio-stable: VERSION=stable
 install-fluvio-stable: curl-install-fluvio

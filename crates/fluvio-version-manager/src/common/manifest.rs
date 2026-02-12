@@ -12,7 +12,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use semver::Version;
 
-use fluvio_hub_util::fvm::Channel;
+use fluvio_artifacts_util::fvm::Channel;
 
 /// The name of the manifest file for the Package Set
 pub const PACKAGE_SET_MANIFEST_FILENAME: &str = "manifest.json";

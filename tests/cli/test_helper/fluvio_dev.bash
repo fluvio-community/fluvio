@@ -55,7 +55,7 @@ function setup_fluvio_cluster() {
     NEW_FLUVIO_BIN=$HOME/.fvm/versions/$CLUSTER_VERSION/fluvio
 
     echo "# Installing cluster @ VERSION: $CLUSTER_VERSION" >&3
-    curl -fsS https://hub.infinyon.cloud/install/install.sh?ctx=ci | VERSION=$CLUSTER_VERSION bash >&3
+    curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | VERSION=$CLUSTER_VERSION bash >&3
     echo "# Starting cluster @ VERSION: $CLUSTER_VERSION" >&3
 
     if [ "$CLUSTER_VERSION" = "latest" ]; then
@@ -74,6 +74,6 @@ function setup_fluvio_cluster() {
 function setup_fluvio_cli() {
     CLI_VERSION=${1:-latest}
     echo "Installing CLI @ VERSION: $CLI_VERSION" >&3
-    curl -fsS https://hub.infinyon.cloud/install/install.sh?ctx=ci | VERSION=$CLI_VERSION bash >&3
+    curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | VERSION=$CLI_VERSION bash >&3
     $HOME/.fvm/versions/$CLI_VERSION/fluvio version >&3
 }

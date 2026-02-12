@@ -4,8 +4,9 @@ use anyhow::Result;
 use clap::Parser;
 use colored::Colorize;
 use semver::Version;
+use octocrab::Octocrab;
 
-use ureq::OrAnyStatus;
+use fluvio_artifacts_util::{REPO_NAME, REPO_OWNER};
 
 use crate::{
     common::{notify::Notify, update_manager::UpdateManager},
@@ -14,10 +15,6 @@ use crate::{
 
 /// Environment variable to store the version of FVM to fetch
 const FVM_UPDATE_VERSION: &str = "FVM_UPDATE_VERSION";
-
-/// Default URL used to fetch the `stable` channel tag
-const FVM_STABLE_CHANNEL_URL: &str =
-    "https://packages.fluvio.io/v1/packages/fluvio/fvm/tags/stable";
 
 #[derive(Clone, Debug, Parser)]
 pub struct SelfUpdateOpt;
@@ -43,7 +40,7 @@ impl SelfUpdateOpt {
     }
 
     /// Determines the version of FVM to fetch taking into account
-    /// the environment variable `FVM_VERSION` and the `stable` channel
+    /// the environment variable `FVM_UPDATE_VERSION` and the `stable` channel
     async fn resolve_version(&self) -> Result<Version> {
         if let Ok(version) = var(FVM_UPDATE_VERSION) {
             return Ok(Version::parse(&version)?);
@@ -54,17 +51,20 @@ impl SelfUpdateOpt {
 
     /// Fetches the `stable` channel tag from the Fluvio Version Manager
     async fn fetch_stable_tag(&self) -> Result<Version> {
-        // let client = Client::new();
-        // let request = client.get(FVM_STABLE_CHANNEL_URL)?;
+        let octocrab = Octocrab::builder().build()?;
 
-        let request = ureq::get(FVM_STABLE_CHANNEL_URL);
-        let response = request
-            .call()
-            .or_any_status()
-            .map_err(|e| anyhow::anyhow!("Unable to retrieve stable tag for FVM: {e}"))?;
+        // Use GitHub latest release for fluvio-community/fluvio (non-prerelease)
+        let release = octocrab
+            .repos(REPO_OWNER, REPO_NAME)
+            .releases()
+            .get_latest()
+            .await
+            .map_err(|e| anyhow::anyhow!("Unable to retrieve stable release for FVM: {e}"))?;
 
-        let version = response.into_string()?;
-        let version = Version::parse(&version)?;
+        let tag = release.tag_name;
+
+        let tag = tag.trim_start_matches('v');
+        let version = Version::parse(tag)?;
 
         Ok(version)
     }

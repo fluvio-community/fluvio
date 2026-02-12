@@ -4,7 +4,7 @@ use std::fs::{copy, create_dir, remove_file, rename};
 use anyhow::{anyhow, Result};
 use tempfile::TempDir;
 
-use fluvio_hub_util::fvm::{Artifact, Channel, Download, PackageSet};
+use fluvio_artifacts_util::fvm::{Artifact, Channel, Download, PackageSet};
 
 use super::executable::set_executable_mode;
 use super::manifest::{VersionManifest, VersionedArtifact, PACKAGE_SET_MANIFEST_FILENAME};

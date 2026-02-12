@@ -268,8 +268,6 @@ jobs:
             features: ""
           - crate: fluvio-types
             features: ""
-          - crate: fluvio-hub-util
-            features: ""
     env:
       RUST_BACKTRACE: full
     steps:
@@ -974,7 +972,6 @@ jobs:
           retention-days: 1
 
   fvm_cli_smoke:
-    if: ${{ false }} # disable until fvm is migrated to github based workflow
     name: CLI smoke test (fvm)
     needs: build_primary_binaries
     runs-on: ${{ matrix.os }}

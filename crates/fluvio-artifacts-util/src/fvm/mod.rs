@@ -70,7 +70,7 @@ impl Ord for Channel {
                 Channel::Stable => Ordering::Less,
                 Channel::Latest => Ordering::Less,
                 Channel::Tag(tag_version) => version.cmp(tag_version),
-                Channel::Other(_) => Ordering::Less,
+                Channel::Other(_) => Ordering::Greater,
             },
             Channel::Other(version) => match other {
                 Channel::Stable => Ordering::Less,
@@ -114,13 +114,21 @@ impl FromStr for Channel {
     }
 }
 
-/// Artifact download URL
+/// Artifact metadata for a single downloadable item.
+///
+/// Note: `sha256_digest`, when present, applies to the raw bytes returned
+/// from `download_url` (for example, a `.zip` archive) and is validated
+/// before any extraction or post-processing. It does **not** currently
+/// apply to an inner binary extracted from an archive.
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Artifact {
     pub name: String,
     pub version: Version,
     pub download_url: String,
-    pub sha256_url: String,
+    /// SHA-256 digest of the downloaded artifact bytes as served at
+    /// `download_url` (e.g. the full `.zip` archive), not of any
+    /// extracted inner binary.
+    pub sha256_digest: Option<String>,
 }
 
 /// Fluvio Version Manager Package for a specific architecture and version.
@@ -155,8 +163,8 @@ pub struct PackageSet {
 }
 
 impl PackageSet {
-    /// Checks wether `upstream` [`PackageSet`] includes missing artifacts,
-    /// and returs a `Vec<Artifact>` containing these.
+    /// Checks whether `upstream` [`PackageSet`] includes missing artifacts,
+    /// and returns a `Vec<Artifact>` containing these.
     ///
     /// Patches included in [`PackageSet`]s are detected comparing versions
     /// at the `artifacts` level.
@@ -243,6 +251,14 @@ mod tests {
     }
 
     #[test]
+    fn determines_tag_is_greater_than_other() {
+        let tag = Channel::parse("0.1.0").unwrap();
+        let other = Channel::parse("ssdk-preview1").unwrap();
+
+        assert!(tag > other);
+    }
+
+    #[test]
     fn determines_if_other_packageset_includes_diff_artifacts() {
         let package_sets = vec![
             (
@@ -255,9 +271,7 @@ mod tests {
                         download_url: String::from(
                             "https://packages.fluvio.io/fluvio-cloud/aarch64-apple-darwin/0.2.19",
                         ),
-                        sha256_url: String::from(
-                            "https://packages.fluvio.io/v1/packages/fluvio/fluvio-cloud/0.2.19/aarch64-apple-darwin/fluvio-cloud.sha256",
-                        ),
+                        sha256_digest: None,
                     }],
                 },
                 PackageSet {
@@ -269,9 +283,7 @@ mod tests {
                         download_url: String::from(
                             "https://packages.fluvio.io/fluvio-cloud/aarch64-apple-darwin/0.2.19",
                         ),
-                        sha256_url: String::from(
-                            "https://packages.fluvio.io/v1/packages/fluvio/fluvio-cloud/0.2.19/aarch64-apple-darwin/fluvio-cloud.sha256",
-                        ),
+                        sha256_digest: None,
                     }],
                 },
                 1,
@@ -286,9 +298,7 @@ mod tests {
                         download_url: String::from(
                             "https://packages.fluvio.io/fluvio-cloud/aarch64-apple-darwin/0.2.19",
                         ),
-                        sha256_url: String::from(
-                            "https://packages.fluvio.io/v1/packages/fluvio/fluvio-cloud/0.2.19/aarch64-apple-darwin/fluvio-cloud.sha256",
-                        ),
+                        sha256_digest: None,
                     }],
                 },
                 PackageSet {
@@ -300,9 +310,7 @@ mod tests {
                         download_url: String::from(
                             "https://packages.fluvio.io/fluvio-cloud/aarch64-apple-darwin/0.2.19",
                         ),
-                        sha256_url: String::from(
-                            "https://packages.fluvio.io/v1/packages/fluvio/fluvio-cloud/0.2.19/aarch64-apple-darwin/fluvio-cloud.sha256",
-                        ),
+                        sha256_digest: None,
                     }],
                 },
                 0,
@@ -317,9 +325,7 @@ mod tests {
                         download_url: String::from(
                             "https://packages.fluvio.io/fluvio-cloud/aarch64-apple-darwin/0.2.19",
                         ),
-                        sha256_url: String::from(
-                            "https://packages.fluvio.io/v1/packages/fluvio/fluvio-cloud/0.2.19/aarch64-apple-darwin/fluvio-cloud.sha256",
-                        ),
+                        sha256_digest: None,
                     }],
                 },
                 PackageSet {
@@ -339,9 +345,7 @@ mod tests {
                         download_url: String::from(
                             "https://packages.fluvio.io/fluvio-cloud/aarch64-apple-darwin/0.2.19",
                         ),
-                        sha256_url: String::from(
-                            "https://packages.fluvio.io/v1/packages/fluvio/fluvio-cloud/0.2.19/aarch64-apple-darwin/fluvio-cloud.sha256",
-                        ),
+                        sha256_digest: None,
                     }],
                 },
                 PackageSet {
@@ -353,9 +357,7 @@ mod tests {
                         download_url: String::from(
                             "https://packages.fluvio.io/fluvio-cloud/aarch64-apple-darwin/0.2.19",
                         ),
-                        sha256_url: String::from(
-                            "https://packages.fluvio.io/v1/packages/fluvio/fluvio-cloud/0.2.19/aarch64-apple-darwin/fluvio-cloud.sha256",
-                        ),
+                        sha256_digest: None,
                     }],
                 },
                 1,
@@ -375,9 +377,7 @@ mod tests {
                         download_url: String::from(
                             "https://packages.fluvio.io/fluvio-cloud/aarch64-apple-darwin/0.2.19",
                         ),
-                        sha256_url: String::from(
-                            "https://packages.fluvio.io/v1/packages/fluvio/fluvio-cloud/0.2.19/aarch64-apple-darwin/fluvio-cloud.sha256",
-                        ),
+                        sha256_digest: None,
                     }],
                 },
                 1,

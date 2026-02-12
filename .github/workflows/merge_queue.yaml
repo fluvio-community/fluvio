@@ -13,8 +13,6 @@ on:
 #  pull_request:
 #    branches: [master]
 
-
-
 env:
   CARGO_TERM_COLOR: always
   VERBOSE: ${{ github.events.input.verbose }}
@@ -253,7 +251,7 @@ jobs:
       - name: Install zig
         run: ./actions/zig-install.sh ${{ matrix.os }}
       - name: Install gcc-multilib
-        run: sudo apt-get install gcc-multilib
+        run: sudo apt update && sudo apt-get install gcc-multilib
         if: matrix.rust-target  == 'arm-unknown-linux-gnueabihf' || matrix.rust-target  == 'armv7-unknown-linux-gnueabihf'
       - name: Install NASM
         if: matrix.rust-target  == 'x86_64-pc-windows-gnu'

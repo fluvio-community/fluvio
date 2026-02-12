@@ -122,7 +122,7 @@ In the event that the release automation fails, there is manual cleanup required
   - s3://packages.fluvio.io/v1/packages/fluvio/fluvio-run/meta.json
   - This should be a regular release tag (x.y.z), not a dev tag (x.y.z+gitcommit)
   - Confirm that the installation script works
-    - `curl -fsS https://hub.infinyon.cloud/install/install.sh | bash`
+    - `curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | bash`
 
 ### Post Release dep update
 

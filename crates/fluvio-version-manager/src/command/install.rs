@@ -7,10 +7,8 @@ use std::fs::create_dir_all;
 
 use anyhow::Result;
 use clap::Parser;
-use url::Url;
 
-use fluvio_hub_util::HUB_REMOTE;
-use fluvio_hub_util::fvm::{Client, Channel};
+use fluvio_artifacts_util::fvm::{Client, Channel};
 
 use crate::common::TARGET;
 use crate::common::notify::Notify;
@@ -23,9 +21,6 @@ pub struct InstallOpt {
     /// Binaries architecture triple to use
     #[arg(long, env = "FVM_BINARY_ARCH_TRIPLE", default_value = TARGET)]
     target: String,
-    /// Registry used to fetch Fluvio Versions
-    #[arg(long, env = "INFINYON_HUB_REMOTE", default_value = HUB_REMOTE)]
-    registry: Url,
     /// Version to install: stable, latest, or named-version x.y.z
     #[arg(index = 1, default_value_t = Channel::Stable)]
     version: Channel,
@@ -40,9 +35,9 @@ impl InstallOpt {
             create_dir_all(&versions_path)?;
         }
 
-        let client = Client::new(self.registry.as_str())?;
+        let client = Client;
         let pkgset = client
-            .fetch_package_set(&self.version, &self.target)
+            .fetch_default_package_set(&self.version, &self.target)
             .await?;
 
         VersionInstaller::new(self.version.to_owned(), pkgset, notify)

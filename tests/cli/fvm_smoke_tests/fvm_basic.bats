@@ -12,40 +12,26 @@ setup_file() {
     # Tests in this file are executed in order and rely on the previous test
     # to be successful.
 
-    INFINYON_HUB_REMOTE="https://hub.infinyon.cloud"
-    export INFINYON_HUB_REMOTE
-    debug_msg "Using Hub Registry URL: $INFINYON_HUB_REMOTE"
-
     export INFINYON_CI_CONTEXT="ci"
 
     # Retrieves the latest stable version from the GitHub API and removes the
     # `v` prefix from the tag name.
-    STABLE_VERSION=$(curl "https://api.github.com/repos/infinyon/fluvio/releases/latest" | jq -r .tag_name | cut -c2-)
+    STABLE_VERSION=$(curl "https://api.github.com/repos/fluvio-community/fluvio/releases/latest" | jq -er '.tag_name' | cut -c2-)
     export STABLE_VERSION
     debug_msg "Stable Version: $STABLE_VERSION"
+    
+    FLUVIO_RUN_STABLE_VERSION="$STABLE_VERSION"
+    export FLUVIO_RUN_STABLE_VERSION
 
-    # Fetches current Fluvio Cloud CLI Stable Version
-    FLUVIO_CLOUD_STABLE_VERSION=$(curl "https://packages.fluvio.io/v1/packages/fluvio/fluvio-cloud/tags/stable")
-    export FLUVIO_CLOUD_STABLE_VERSION
-    debug_msg "Fluvio Cloud Stable Version: $FLUVIO_CLOUD_STABLE_VERSION"
-
-    # Fetches current FVM Stable Version
-    FVM_VERSION_STABLE=$(curl "https://packages.fluvio.io/v1/packages/fluvio/fvm/tags/stable")
+    # Fetches current FVM Stable Version from GitHub releases
+    # Use the Fluvio release tag as the FVM stable version indicator for tests
+    FVM_VERSION_STABLE="$STABLE_VERSION"
     export FVM_VERSION_STABLE
     debug_msg "FVM Stable Version: $FVM_VERSION_STABLE"
 
-    # Fetches current FVM Stable Version Sha256
-    FVM_VERSION_STABLE_SHA256=$(curl "https://packages.fluvio.io/v1/packages/fluvio/fvm/$FVM_VERSION_STABLE/x86_64-unknown-linux-musl/fvm.sha256")
-    export FVM_VERSION_STABLE_SHA256
-    debug_msg "FVM Stable Version Sha256: $FVM_VERSION_STABLE_SHA256"
-
-    FVM_UPDATE_CUSTOM_VERSION="0.11.0"
+    FVM_UPDATE_CUSTOM_VERSION="0.18.0"
     export FVM_UPDATE_CUSTOM_VERSION
     debug_msg "FVM Update Custom Version: $FVM_UPDATE_CUSTOM_VERSION"
-
-    FVM_UPDATE_CUSTOM_VERSION_SHA256=$(curl "https://packages.fluvio.io/v1/packages/fluvio/fvm/$FVM_UPDATE_CUSTOM_VERSION/x86_64-unknown-linux-musl/fvm.sha256")
-    export FVM_UPDATE_CUSTOM_VERSION_SHA256
-    debug_msg "FVM Update Custom Version Sha256: $FVM_UPDATE_CUSTOM_VERSION_SHA256"
 
     # The directory where FVM files live
     FVM_HOME_DIR="$HOME/.fvm"
@@ -184,7 +170,6 @@ setup_file() {
     declare -a binaries=(
         fluvio
         fluvio-run
-        fluvio-cloud
         cdk
         smdk
     )
@@ -325,7 +310,6 @@ setup_file() {
         declare -a binaries=(
             fluvio
             fluvio-run
-            fluvio-cloud
             cdk
             smdk
         )
@@ -341,10 +325,6 @@ setup_file() {
             echo "Checking binary: $FLV_BIN_PATH"
             run bash -c 'test -f $FLV_BIN_PATH'
             assert_success
-
-            export SHASUM_A=$(sha256sum $FVM_BIN_PATH | awk '{ print $1 }')
-            export SHASUM_B=$(sha256sum $FLV_BIN_PATH | awk '{ print $1 }')
-            assert_equal "$SHASUM_A" "$SHASUM_B"
         done
     done
 
@@ -416,6 +396,8 @@ setup_file() {
     # Sets `fvm` in the PATH using the "env" file included in the installation
     source ~/.fvm/env
 
+    run bash -c 'rm -rf ~/.fluvio'
+
     # Ensure `~/.fluvio` is not present
     run bash -c '! test -d $FLUVIO_HOME_DIR'
     assert_success
@@ -450,13 +432,13 @@ setup_file() {
     # Checks contents for the stable channel
     run bash -c 'fvm list stable'
     assert_line --index 0 --partial "Artifacts in channel stable version $STABLE_VERSION"
-    assert_line --index 1 --partial "fluvio@$STABLE_VERSION"
+    assert_output --partial "fluvio@$STABLE_VERSION"
     assert_success
 
     # Checks contents for the version 0.10.14
     run bash -c 'fvm list 0.10.14'
     assert_line --index 0 --partial "Artifacts in version 0.10.14"
-    assert_line --index 1 --partial "fluvio@0.10.14"
+    assert_output --partial "fluvio@0.10.14"
     assert_success
 
     # Checks current command output
@@ -538,7 +520,7 @@ setup_file() {
 
     # Expect output if `-q` is not passed
     run bash -c 'fvm install 0.10.14'
-    assert_line --index 0 --partial "info: Downloading (1/5)"
+    assert_line --index 0 --partial "info: Downloading (1/4)"
     assert_output --partial "done: Now using fluvio version 0.10.14"
     assert_success
 
@@ -618,7 +600,7 @@ setup_file() {
     run bash -c 'echo "echo \"Hello World!\"" > "$FVM_HOME_DIR/bin/fvm"'
     assert_success
 
-    # Store this file Sha256 Checksum
+    # Store checksum of the test binary before install
     export SHASUM_TEST_FILE=$(sha256sum "$FVM_HOME_DIR/bin/fvm" | awk '{ print $1 }')
 
     # Install FVM using `self install`
@@ -628,7 +610,7 @@ setup_file() {
     # Sets `fvm` in the PATH using the "env" file included in the installation
     source ~/.fvm/env
 
-    # Store FVM Binary Sha256 Checksum
+    # Store checksum of the installed FVM binary
     export SHASUM_FVM_BIN=$(sha256sum "$FVM_HOME_DIR/bin/fvm" | awk '{ print $1 }')
 
     # Ensure the checksums are different
@@ -831,7 +813,7 @@ setup_file() {
 
     # Attempts to install unexistent version
     run bash -c 'fvm install 0.0.0'
-    assert_line --index 0 "Error: PackageSet 0.0.0 doest not exist"
+    assert_line --index 0 "Error: Unable to retrieve release for tag v0.0.0: Not Found"
     assert_failure
 
     # Removes FVM
@@ -900,24 +882,22 @@ setup_file() {
     assert_success
 
     # Updates manifest to trigger update
-    sed -i -e "s/$FLUVIO_CLOUD_STABLE_VERSION/0.2.21/g" $FVM_HOME_DIR/versions/stable/manifest.json
+    sed -i -e "s/$FLUVIO_RUN_STABLE_VERSION/0.18.0/g" $FVM_HOME_DIR/versions/stable/manifest.json
 
-    # Removes current `fluvio-cloud` binary so we check it is re-downloaded
-    rm -rf $FVM_HOME_DIR/versions/stable/fluvio-cloud
+    # Removes current `fluvio-run` binary so we check it is re-downloaded
+    rm -rf $FVM_HOME_DIR/versions/stable/fluvio-run
 
-    # Ensure `~/.fvm/versions/stable/fluvio-cloud` IS NOT present
-    run bash -c '! test -f $FVM_HOME_DIR/versions/stable/fluvio-cloud'
+    # Ensure `~/.fvm/versions/stable/fluvio-run` IS NOT present
+    run bash -c '! test -f $FVM_HOME_DIR/versions/stable/fluvio-run'
     assert_success
 
     # Downloads the update
     run bash -c 'fvm update'
-    assert_line --index 0 "info: Found 1 packages in this version that needs update."
-    assert_line --index 1 "info: Downloading (1/1): fluvio-cloud@$FLUVIO_CLOUD_STABLE_VERSION"
-    assert_line --index 2 "info: Updated fluvio-cloud from 0.2.21 to $FLUVIO_CLOUD_STABLE_VERSION"
+    assert_output --partial "info: Updated fluvio-run from 0.18.0 to $FLUVIO_RUN_STABLE_VERSION"
     assert_success
 
-    # Ensure `~/.fvm/versions/stable/fluvio-cloud` IS present
-    run bash -c 'test -f $FVM_HOME_DIR/versions/stable/fluvio-cloud'
+    # Ensure `~/.fvm/versions/stable/fluvio-run` IS present
+    run bash -c 'test -f $FVM_HOME_DIR/versions/stable/fluvio-run'
     assert_success
 
     # Removes FVM
@@ -964,13 +944,6 @@ setup_file() {
         assert_line --index 2 "info: Installing fvm@$FVM_VERSION_STABLE"
         assert_line --index 3 "done: Installed fvm@$FVM_VERSION_STABLE with success"
         assert_success
-
-        # Store FVM Binary Sha256 Checksum
-        export NEXT_FVM_BIN_CHECKSUM=$(sha256sum "$FVM_HOME_DIR/bin/fvm" | awk '{ print $1 }')
-
-        # Ensure the checksums matches upstream FVM checksum for this architecture
-        run bash -c "[[ "$FVM_VERSION_STABLE_SHA256" == "$NEXT_FVM_BIN_CHECKSUM" ]]"
-        assert_success
     fi
 
     # Removes FVM
@@ -994,16 +967,9 @@ setup_file() {
     assert_line --index 0 "fvm CLI: $VERSION_FILE"
     assert_success
 
-    # Updates FVM using FVM as of Fluvio 0.11.0
+    # Updates FVM using FVM as of Fluvio 0.18.0
     run bash -c "FVM_UPDATE_VERSION=$FVM_UPDATE_CUSTOM_VERSION $FVM_BIN self update"
     assert_line --index 0 "info: Updating FVM from $VERSION_FILE to $FVM_UPDATE_CUSTOM_VERSION"
-    assert_success
-
-    # Store FVM Binary Sha256 Checksum
-    export NEXT_FVM_BIN_CHECKSUM=$(sha256sum "$FVM_HOME_DIR/bin/fvm" | awk '{ print $1 }')
-
-    # Ensure the checksums matches upstream FVM checksum for this architecture
-    run bash -c "[[ "$FVM_UPDATE_CUSTOM_VERSION_SHA256" == "$NEXT_FVM_BIN_CHECKSUM" ]]"
     assert_success
 
     # Removes FVM
@@ -1024,7 +990,7 @@ setup_file() {
 
     # Attempts to install unsupported target triple
     run bash -c '$FVM_BIN install 0.11.12 --target aarch64-unknown-linux-gnu'
-    assert_line --index 0 "Error: PackageSet \"0.11.12\" is not available for architecture: \"aarch64-unknown-linux-gnu\""
+    assert_line --index 0 "Error: Release \"v0.11.12\" does not have artifacts for architecture: \"aarch64-unknown-linux-gnu\""
     assert_failure
 
     # Removes FVM

@@ -26,7 +26,7 @@ Then use the `fluvio` CLI to connect to the cluster running in Docker, to do
 that you must set the _Fluvio Profile_ to point to Docker's container SC:
 
 > If you dont have the Fluvio CLI installed, run the following command
-> `curl -fsS https://hub.infinyon.cloud/install/install.sh | bash`.
+> `curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | bash`.
 > Refer to [Fluvio CLI Reference][2] for more details.
 
 ```bash

@@ -9,8 +9,6 @@ use fluvio_hub_protocol::{HubError, PackageMeta, PkgTag};
 use fluvio_hub_protocol::constants::{HUB_PACKAGE_META, PKG_TAG_META_PUBLISHED_AT};
 use fluvio_hub_protocol::validate_allowedchars;
 
-use crate::package_get_topfile;
-
 type Result<T> = std::result::Result<T, HubError>;
 
 pub trait PackageMetaExt {
@@ -116,16 +114,6 @@ pub fn packagename_transform(pkgname: &str) -> Result<String> {
     Ok(tfm_pkgname)
 }
 
-/// given a package.tar file get the package-meta data
-pub fn package_get_meta<P: AsRef<Path>>(pkgfile: P) -> Result<PackageMeta> {
-    let buf = package_get_topfile(pkgfile.as_ref(), HUB_PACKAGE_META)?;
-    let strbuf = std::str::from_utf8(&buf).map_err(|_| {
-        HubError::UnableGetPackageMeta(pkgfile.as_ref().to_string_lossy().to_string())
-    })?;
-    let pm: PackageMeta = serde_yaml::from_str(strbuf)?;
-    Ok(pm)
-}
-
 /// Creates an instance of `PackageMeta` from bytes representing a TAR
 /// package.
 pub fn package_meta_from_bytes(reader: &[u8]) -> Result<PackageMeta> {
@@ -163,7 +151,6 @@ pub fn package_meta_relative_path<P: AsRef<Path>, T: AsRef<Path>>(
 
 #[cfg(test)]
 mod tests {
-    use fluvio_hub_protocol::PkgTag;
 
     use super::*;
 
@@ -264,56 +251,6 @@ mod tests {
     }
 
     #[test]
-    fn hub_package_meta_t_read() {
-        let testfile = "tests/apackage/".to_owned() + HUB_PACKAGE_META;
-        let pm = PackageMeta {
-            group: "infinyon".into(),
-            name: "example".into(),
-            version: "0.0.1".into(),
-            manifest: ["module.wasm".into()].to_vec(),
-            tags: Some(vec![fluvio_hub_protocol::PkgTag {
-                tag: "arch".to_owned(),
-                value: "aarch64-unknown-linux-gnu".to_owned(),
-            }]),
-            ..PackageMeta::default()
-        };
-
-        let pm_read = PackageMeta::read_from_file(testfile).expect("error reading package file");
-
-        assert_eq!(pm, pm_read);
-    }
-
-    #[test]
-    fn hub_package_write() {
-        use fluvio_hub_protocol::PkgTag;
-
-        let pm = PackageMeta {
-            group: "infinyon".into(),
-            name: "test-write".into(),
-            version: "0.0.1".into(),
-            manifest: ["tests/apackage/module.wasm".into()].to_vec(),
-            ..PackageMeta::default()
-        };
-        pm.write("tests/apackage/package-yaml-write.yaml.tmp")
-            .expect("write fail");
-
-        let tags = vec![PkgTag {
-            tag: "target".to_string(),
-            value: "aarch64-unknown-linux-musl".to_string(),
-        }];
-        let pm = PackageMeta {
-            group: "infinyon".into(),
-            name: "test-write".into(),
-            version: "0.0.1".into(),
-            manifest: ["tests/apackage/module.wasm".into()].to_vec(),
-            tags: Some(tags),
-            ..PackageMeta::default()
-        };
-        pm.write("tests/apackage/package-yaml-write-tags.yaml.tmp")
-            .expect("write fail");
-    }
-
-    #[test]
     fn hub_package_meta_t_write_then_read() {
         let testfile: &str = "tests/hub_package_meta_rw_test.yaml";
         let pm = PackageMeta {
@@ -407,76 +344,6 @@ mod tests {
         for pm in deny {
             let res = pm.naming_check();
             assert!(res.is_err(), "Denied an valid package meta config {pm:?}");
-        }
-    }
-
-    #[cfg(test)]
-    mod t_packagemeta_version {
-        use fluvio_hub_protocol::{HubError, PackageMeta, PkgTag, PkgVisibility};
-
-        use crate::PackageMetaExt;
-
-        fn read_pkgmeta(fname: &str) -> Result<PackageMeta, HubError> {
-            let pm = PackageMeta::read_from_file(fname)?;
-            Ok(pm)
-        }
-
-        /// the current code should be able to load all old versions
-        #[test]
-        fn backward_compat() {
-            let flist = [
-                "tests/apackage/package-meta.yaml",
-                "tests/apackage/package-meta-v0.1.yaml",
-                "tests/apackage/package-meta-v0.2-owner.yaml",
-                "tests/apackage/package-meta-v0.2-public.yaml",
-                "tests/apackage/package-meta-v0.3-notags.yaml",
-                "tests/apackage/package-meta-v0.3-notags2.yaml",
-                "tests/apackage/package-meta-v0.3-targets.yaml",
-            ];
-
-            for ver in flist {
-                let msg = format!("Failed to read {ver}");
-                let _pm = read_pkgmeta(ver).expect(&msg);
-            }
-        }
-
-        #[test]
-        fn read_tags_targets() {
-            const TAGGED_PM: &str = "tests/apackage/package-meta-v0.3-targets.yaml";
-            let msg = format!("couldn't read {TAGGED_PM}");
-            let pm = read_pkgmeta(TAGGED_PM).expect(&msg);
-            let tags = [
-                ("arch", "aarch64-apple-darwin"),
-                ("arch", "aarch64-unknown-linux-musl"),
-            ]
-            .iter()
-            .fold(Vec::new(), |mut h, (k, v)| {
-                let tag = PkgTag::new(k, v);
-                h.push(tag);
-                h
-            });
-            assert_eq!(Some(tags), pm.tags);
-        }
-
-        #[test]
-        fn visibility_invalid() {
-            let visbad = "tests/apackage/package-meta-v0.2-visbad.yaml";
-            let res = read_pkgmeta(visbad);
-            println!("{:?}", &res);
-            assert!(res.is_err());
-        }
-
-        #[test]
-        fn visibility_defaults_owner_v0_1() {
-            // if package meta is missing any visibility field, like older versions will be missing
-            // check that they default to private (Owner) visiblity
-            let visbad = "tests/apackage/package-meta-v0.1.yaml";
-            let res = read_pkgmeta(visbad);
-            println!("{:?}", &res);
-            assert!(res.is_ok());
-            if let Ok(pm) = res {
-                assert_eq!(pm.visibility, PkgVisibility::Private);
-            }
         }
     }
 

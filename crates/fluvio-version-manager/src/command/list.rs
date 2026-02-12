@@ -7,7 +7,7 @@ use clap::Parser;
 use colored::Colorize;
 use comfy_table::{Table, Row};
 
-use fluvio_hub_util::fvm::Channel;
+use fluvio_artifacts_util::fvm::Channel;
 
 use crate::common::manifest::VersionManifest;
 use crate::common::notify::Notify;

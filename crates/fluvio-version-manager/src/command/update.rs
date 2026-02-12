@@ -3,10 +3,8 @@
 use anyhow::{Result, Error};
 use clap::Args;
 use colored::Colorize;
-use url::Url;
 
-use fluvio_hub_util::HUB_REMOTE;
-use fluvio_hub_util::fvm::{Client, Channel, PackageSet};
+use fluvio_artifacts_util::fvm::{Client, Channel, PackageSet};
 
 use crate::common::version_directory::VersionDirectory;
 use crate::common::workdir::fvm_versions_path;
@@ -16,11 +14,7 @@ use crate::common::settings::Settings;
 use crate::common::version_installer::VersionInstaller;
 
 #[derive(Debug, Args)]
-pub struct UpdateOpt {
-    /// Registry used to fetch Fluvio Versions
-    #[arg(long, env = "INFINYON_HUB_REMOTE", default_value = HUB_REMOTE)]
-    registry: Url,
-}
+pub struct UpdateOpt;
 
 impl UpdateOpt {
     pub async fn process(self, notify: Notify) -> Result<()> {
@@ -117,8 +111,8 @@ impl UpdateOpt {
             ));
         }
 
-        let client = Client::new(self.registry.as_str())?;
-        let pkgset = client.fetch_package_set(channel, TARGET).await?;
+        let client = Client;
+        let pkgset = client.fetch_default_package_set(channel, TARGET).await?;
 
         Ok(pkgset)
     }

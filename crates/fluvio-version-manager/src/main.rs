@@ -1,7 +1,7 @@
 mod command;
 mod common;
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use clap::Parser;
 use command::uninstall::UninstallOpt;
 
@@ -23,6 +23,13 @@ pub const VERSION: &str = include_str!("../../../VERSION");
 #[fluvio_future::main_async]
 async fn main() -> Result<()> {
     fluvio_future::subscriber::init_tracer(None);
+    if rustls::crypto::CryptoProvider::get_default().is_none()
+        && rustls::crypto::aws_lc_rs::default_provider()
+            .install_default()
+            .is_err()
+    {
+        bail!("Failed to install AWS-LC-Rust as default crypto provider");
+    }
 
     let args = Cli::parse();
 

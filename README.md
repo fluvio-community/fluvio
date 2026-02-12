@@ -6,11 +6,11 @@
   <br>
   <br>
 
-[![CI Status](https://github.com/infinyon/fluvio/actions/workflows/hourly.yml/badge.svg)](https://github.com/infinyon/fluvio/actions/workflows/hourly.yml)
-  [![CD Status](https://github.com/infinyon/fluvio/workflows/CD_Dev/badge.svg)](https://github.com/infinyon/fluvio/actions/workflows/cd_dev.yaml)
+[![CI Status](https://github.com/fluvio-community/fluvio/actions/workflows/hourly.yml/badge.svg)](https://github.com/fluvio-community/fluvio/actions/workflows/hourly.yml)
+  [![CD Status](https://github.com/fluvio-community/fluvio/workflows/CD_Dev/badge.svg)](https://github.com/fluvio-community/fluvio/actions/workflows/cd_dev.yaml)
   [![fluvio Crates.io version](https://img.shields.io/crates/v/fluvio?style=flat)](https://crates.io/crates/fluvio)
   [![Fluvio Rust documentation](https://docs.rs/fluvio/badge.svg)](https://docs.rs/fluvio)
-  [![Fluvio dependency status](https://deps.rs/repo/github/infinyon/fluvio/status.svg)](https://deps.rs/repo/github/infinyon/fluvio)
+  [![Fluvio dependency status](https://deps.rs/repo/github/fluvio-community/fluvio/status.svg)](https://deps.rs/repo/github/fluvio-community/fluvio)
   [![Fluvio Discord](https://img.shields.io/discord/695712741381636168.svg?logo=discord&style=flat)](https://discordapp.com/invite/bBG2dTz)
 
   <br>
@@ -20,7 +20,7 @@
   <br>
 </div>
 
-**Fluvio** is a lean and mean distributed data streaming engine written in Rust. Combined with **Stateful DataFlow** distributed stream processing framework, Fluvio provides a *unified* *composable* *distributed streaming* and *stream processin*g paradigm for developers. It is the foundation of [InfinyOn Cloud](https://infinyon.cloud/).
+**Fluvio** is a lean and mean distributed data streaming engine written in Rust. Combined with **Stateful DataFlow** distributed stream processing framework, Fluvio provides a *unified* *composable* *distributed streaming* and *stream processin*g paradigm for developers.
 
 ## Quick Start - Get started with Fluvio in 2 minutes or less!
 
@@ -30,9 +30,20 @@ Fluvio is installed via the **Fluvio Version Manager**, shortened to `fvm`.
 
 To install `fvm`, run the following command:
 
+**TEMPORARY NOTE**: While we are transitioning to a new fluvio-community hosted
+fluvio build and release, you should install the dev version of FVM:
 ```bash
-curl -fsS https://hub.infinyon.cloud/install/install.sh | bash
+curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | FVM_VERSION=dev bash
 ```
+
+After we get the fluvio-community based released sorted again, it will return to:
+
+```bash
+curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | bash
+```
+
+
+
 As part of the initial setup, `fvm` will also install the Fluvio CLI available in the stable channel as of the moment of installation.
 
 Fluvio is stored in `$HOME/.fluvio`, with the executable binaries stored in `$HOME/.fluvio/bin`.
@@ -75,19 +86,28 @@ fluvio consume hello-fluvio -B -d
 
 Just like that! You have a local cluster running.
 
-## Using Pre-Build Fluvio Versions
+## Using Pre-Built Fluvio Versions
 
-You may want to prefer other Fluvio versions than the latest stable release. You can do so by specifying the version in the `VERSION` environment variable.
-**Install Latest Release (as of `master` branch)**
+You may want to use other Fluvio versions than the latest stable release. You can do so by specifying the version using environment variables.
+
+**Install Latest Dev Version**
+
+To install the latest development build of fvm and fluvio:
 
 ```bash
-$ curl -fsS https://hub.infinyon.cloud/install/install.sh | VERSION=latest bash
+curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | FVM_VERSION=dev bash
 ```
 
-**Install Specific Version**
+**Install Specific Fluvio Version**
 
 ```bash
-$ curl -fsS https://hub.infinyon.cloud/install/install.sh | VERSION=x.y.z bash
+curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | FLUVIO_VERSION=x.y.z bash
+```
+
+**Install Specific FVM Version**
+
+```bash
+curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | FVM_VERSION=v0.18.1 bash
 ```
 
 #### Check Fluvio Core Documentation
@@ -122,19 +142,13 @@ Fluvio applies wasm based stream processing and data transformations. We call th
 - [Smart Modules docs](https://www.fluvio.io/docs/smartmodules/overview)
 - [Smart Modules Development Kit (smdk) docs](https://www.fluvio.io/docs/smartmodules/smdk)
 
-#### Try workflows on InfinyOn Cloud
-InfinyOn Cloud is Fluvio on the cloud as a managed service.
-- [Check InfinyOn Cloud Guides](https://infinyon.com/docs/guides/)
-- [Check out experimental data flows on InfinyOn Labs Repo](https://github.com/infinyon/labs-projects)
-
 ### Clients
 - [Fluvio Client API docs home](https://www.fluvio.io/docs/fluvio/apis/overview)
 
 **Language Specifc API docs:**
 - [Rust API docs](https://docs.rs/fluvio/latest/fluvio/)
-- [Python API docs](https://infinyon.github.io/fluvio-client-python/fluvio.html)
-- [Javascript API docs](https://infinyon.github.io/fluvio-client-node/)
-
+- [Python API docs](https://www.fluvio.io/docs/fluvio/apis/python/example)
+- [Javascript API docs](https://github.com/fluvio-community/fluvio-client-node)
 
 **Community Maintained:**
 - [Go API docs](https://github.com/avinassh/fluvio-go)
@@ -168,8 +182,8 @@ More projects and utilities are available in the  [Fluvio Community Github Org](
 - [Gurubase](https://gurubase.io/g/fluvio): Third-party AI/LLM Docs query
 
 ### Contributors are awesome
-<a href="https://github.com/infinyon/fluvio/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=infinyon/fluvio" />
+<a href="https://github.com/fluvio-community/fluvio/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=fluvio-community/fluvio" />
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).

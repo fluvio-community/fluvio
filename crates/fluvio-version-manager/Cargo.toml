@@ -22,6 +22,8 @@ comfy-table = { workspace = true }
 current_platform = { workspace = true }
 dialoguer = { workspace = true }
 dirs = { workspace = true }
+octocrab = { workspace = true, default-features = false, features = ["default-client", "rustls", "rustls-aws-lc-rs"] }
+rustls = { workspace = true, features = ["aws-lc-rs"]}
 semver = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -30,12 +32,10 @@ sysinfo = { workspace = true }
 tempfile = { workspace = true }
 tracing = { workspace = true }
 toml = { workspace = true }
-ureq = { workspace = true }
-url = { workspace = true }
 
 # Workspace Crates
-fluvio-future = { workspace = true, features = ["subscriber", "attributes"] }
-fluvio-hub-util = { workspace = true }
+fluvio-future = { workspace = true, features = ["attributes", "fixture", "task", "tls"] }
+fluvio-artifacts-util = { workspace = true }
 
 [dev-dependencies]
 fs_extra = "1.3.0"

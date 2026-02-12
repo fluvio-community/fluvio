@@ -206,7 +206,7 @@ jobs:
 
       - name: Curl Install - latest
         run: |
-          curl -fsS https://hub.infinyon.cloud/install/install.sh | \
+          curl -fsS https://raw.githubusercontent.com/fluvio-community/fluvio/master/install.sh | \
             FLUVIO_VERSION=${{ matrix.version }} bash | \
             tee /tmp/installer.version
 
