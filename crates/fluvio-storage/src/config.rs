@@ -132,8 +132,11 @@ const fn default_retention_seconds() -> Size {
     STORAGE_RETENTION_SECONDS
 }
 
-const fn default_max_partition_size() -> Size64 {
-    SPU_PARTITION_MAX_BYTES
+fn default_max_partition_size() -> Size64 {
+    std::env::var("FLUVIO_SPU_MAX_PARTITION_SIZE")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(SPU_PARTITION_MAX_BYTES)
 }
 
 impl ReplicaConfig {
