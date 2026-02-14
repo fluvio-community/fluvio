@@ -603,6 +603,8 @@ jobs:
         run: docker image save ghcr.io/fluvio-community/fluvio:${{ github.sha }} --output /tmp/fluvio.tar
       - name: Install K3d
         if: matrix.k8 == 'k3d'
+        env:
+           DOCKER_API_VERSION: "1.44"
         run: |
           curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} bash
           ./k8-util/cluster/reset-k3d.sh
@@ -677,6 +679,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Setup K3d
+        env:
+           DOCKER_API_VERSION: "1.44"
         run: |
           curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} bash
           ./k8-util/cluster/reset-k3d.sh
@@ -1077,6 +1081,8 @@ jobs:
 
       - name: Setup K8s Cluster
         if: matrix.run-mode == 'local-k8'
+        env:
+           DOCKER_API_VERSION: "1.44"
         run: |
           curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} bash
           ./k8-util/cluster/reset-k3d.sh
@@ -1176,6 +1182,8 @@ jobs:
       - name: Export Docker Image to tarball
         run: docker image save ghcr.io/fluvio-community/fluvio:${{ github.sha }} --output /tmp/fluvio.tar
       - name: Install K3d
+        env:
+           DOCKER_API_VERSION: "1.44"
         run: |
           curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} bash
           ./k8-util/cluster/reset-k3d.sh
@@ -1313,6 +1321,8 @@ jobs:
 
       - name: Setup K8s Cluster
         if: matrix.run-mode == 'local-k8'
+        env:
+           DOCKER_API_VERSION: "1.44"
         run: |
           curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} bash
           ./k8-util/cluster/reset-k3d.sh
