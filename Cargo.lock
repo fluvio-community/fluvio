@@ -646,8 +646,14 @@ name = "bytesize"
 version = "1.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2e93abca9e28e0a1b9877922aacb20576e05d4679ffa78c3d6dc22a26a216659"
+
+[[package]]
+name = "bytesize"
+version = "2.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6bd91ee7b2422bcb158d90ef4d14f75ef67f340943fc4149891dcce8f8b972a3"
 dependencies = [
- "serde",
+ "serde_core",
 ]
 
 [[package]]
@@ -656,7 +662,7 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "86d1eb2fd2668859e9785b99700c66b7ea9fdeda35d99f95827a4e5493440178"
 dependencies = [
- "bytesize",
+ "bytesize 1.3.3",
  "serde",
 ]
 
@@ -2177,7 +2183,7 @@ dependencies = [
  "anyhow",
  "async-channel",
  "async-lock",
- "bytesize",
+ "bytesize 2.3.1",
  "clap",
  "derive_builder",
  "fluvio",
@@ -2239,7 +2245,7 @@ dependencies = [
  "anyhow",
  "async-channel",
  "async-trait",
- "bytesize",
+ "bytesize 2.3.1",
  "clap",
  "clap_complete",
  "colored",
@@ -2327,7 +2333,7 @@ dependencies = [
  "anyhow",
  "async-channel",
  "async-trait",
- "bytesize",
+ "bytesize 2.3.1",
  "chrono",
  "clap",
  "color-eyre",
@@ -2447,7 +2453,7 @@ name = "fluvio-connector-package"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "bytesize",
+ "bytesize 2.3.1",
  "bytesize-serde",
  "fluvio-controlplane-metadata",
  "fluvio-smartengine",
@@ -2481,7 +2487,7 @@ dependencies = [
  "anyhow",
  "base64 0.22.1",
  "bytes",
- "bytesize",
+ "bytesize 2.3.1",
  "cfg-if",
  "derive_builder",
  "flate2",
