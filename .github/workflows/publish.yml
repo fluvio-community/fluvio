@@ -69,7 +69,7 @@ jobs:
         with:
           ref: ${{ needs.setup.outputs.pub_sha }}
       - name: Login to github container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
