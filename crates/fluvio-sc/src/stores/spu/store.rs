@@ -240,7 +240,7 @@ where
     async fn live_spu_rack_map_sorted(&self) -> Vec<(String, Vec<SpuId>)> {
         let rack_map = self.online_spu_rack_map().await;
         let mut racked_vector = Vec::from_iter(rack_map);
-        racked_vector.sort_by(|a, b| b.1.len().cmp(&a.1.len()));
+        racked_vector.sort_by_key(|b| std::cmp::Reverse(b.1.len()));
         racked_vector
     }
 

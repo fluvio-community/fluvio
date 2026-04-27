@@ -104,7 +104,7 @@ fn run_test(
             println!("starting test in child process");
             // put panic handler, this shows proper stack trace in the console unlike hook
             let status = std::panic::catch_unwind(AssertUnwindSafe(|| {
-                (test_meta.test_fn)(test_driver, test_case)
+                let _ = (test_meta.test_fn)(test_driver, test_case);
             }));
             let parent_id = get_parent_pid();
             debug!(

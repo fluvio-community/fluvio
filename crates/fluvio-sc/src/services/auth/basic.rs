@@ -210,10 +210,8 @@ mod policy {
                                 actions.iter().any(|permission| {
                                     match (&permission.instance, instance) {
                                         (Some(_), None) => return false,
-                                        (Some(pi), Some(i)) => {
-                                            if !pi.contains(&i.to_string()) {
-                                                return false;
-                                            }
+                                        (Some(pi), Some(i)) if !pi.contains(&i.to_string()) => {
+                                            return false;
                                         }
                                         _ => {}
                                     }

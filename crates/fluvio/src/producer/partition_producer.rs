@@ -241,9 +241,7 @@ where
 
         let (response, _) = self.send_to_socket(spu_socket, request).await?;
 
-        for (batch_notifier, partition_response_fut) in
-            batch_notifiers.into_iter().zip(response.into_iter())
-        {
+        for (batch_notifier, partition_response_fut) in batch_notifiers.into_iter().zip(response) {
             if let Err(_e) = batch_notifier.send(partition_response_fut).await {
                 trace!("Failed to notify produce result because receiver was dropped");
             }
