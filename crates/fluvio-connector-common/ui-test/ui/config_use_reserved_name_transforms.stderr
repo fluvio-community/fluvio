@@ -4,7 +4,7 @@ error: Custom config name conflicts with reserved names: 'meta' and 'transforms'
 7 | struct CustomConfig {}
   | ^^^^^^
 
-error[E0412]: cannot find type `CustomConfig` in this scope
+error[E0425]: cannot find type `CustomConfig` in this scope
  --> ui-test/ui/config_use_reserved_name_transforms.rs:4:27
   |
 4 | async fn start_fn(config: CustomConfig, producer: ()) {}
@@ -37,10 +37,7 @@ error[E0308]: mismatched types
  --> ui-test/ui/config_use_reserved_name_transforms.rs:3:1
   |
 3 | #[connector(source)]
-  | ^^^^^^^^^^^^^^^^^^^^
-  | |
-  | expected `()`, found `Result<_, _>`
-  | this expression has type `()`
+  | ^^^^^^^^^^^^^^^^^^^^ expected `()`, found `Result<_, _>`
   |
   = note: expected unit type `()`
                   found enum `Result<_, _>`
