@@ -119,7 +119,7 @@ include_dir = "0.7.2"
 indicatif = "0.17.0"
 inventory = "0.3"
 libc = "0.2.116"
-madato = "0.7.0"
+madato = "0.8.0"
 mimalloc = "0.1.39"
 minijinja = { version = "2.6", default-features = false }
 mime = "0.3"
