@@ -1,0 +1,15 @@
+# DELIVERY.md
+
+## How to run
+
+1. Install requirements:
+
+   pip install pytest pytest-asyncio
+
+2. Run tests:
+
+   make verify
+
+## Notes
+- The code expects a `fluvio_client_py` Python module (the Rust bindings).
+- Tests use monkeypatching to simulate the Rust backend.

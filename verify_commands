@@ -1,0 +1,1 @@
+['pip install pytest pytest-asyncio', 'make verify']
