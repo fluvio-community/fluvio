@@ -63,7 +63,7 @@ jobs:
       RELEASE_NAME: release
       RELEASE: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Print env
         run: |
@@ -230,7 +230,7 @@ jobs:
       RUST_BIN_DIR: target/${{ matrix.rust-target }}/debug
       RELEASE_NAME: debug
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # If this job is being run by merge_group,
       # then build and run in release mode
@@ -353,7 +353,7 @@ jobs:
         rust: [stable]
     steps:
       # Needed for k8-util/docker/build.sh
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # Download artifacts
       - name: Download fluvio-run
@@ -391,7 +391,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Download x86_64-unknown-linux-musl Docker Image as Artifact
         uses: actions/download-artifact@v8
         with:
@@ -448,7 +448,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       #- name: Login GH CLI
       #  run: gh auth login --with-token < <(echo ${{ secrets.GITHUB_TOKEN }})
       - name: Delete old release
@@ -468,7 +468,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       #- name: Login GH CLI
       #  run: gh auth login --with-token < <(echo ${{ secrets.GITHUB_TOKEN }})
       - name: package helm

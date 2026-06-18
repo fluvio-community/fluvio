@@ -69,7 +69,7 @@ jobs:
       RELEASE_NAME: release
       RELEASE: true
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Print env
         run: |
@@ -151,7 +151,7 @@ jobs:
       RUST_BACKTRACE: full
       TARGET: ${{ matrix.rust-target }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Rust Stable
         uses: dtolnay/rust-toolchain@stable
       - name: Install Zig
@@ -212,7 +212,7 @@ jobs:
       RELEASE: true
       RELEASE_NAME: release
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Rust Stable
         uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
@@ -237,7 +237,7 @@ jobs:
     env:
       RUST_BACKTRACE: full
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Rust Stable
         uses: dtolnay/rust-toolchain@stable
       - name: Download smdk
@@ -271,7 +271,7 @@ jobs:
     env:
       RUST_BACKTRACE: full
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Rust Stable
         uses: dtolnay/rust-toolchain@stable
       - name: install wasm target
@@ -305,7 +305,7 @@ jobs:
     env:
       RUST_BACKTRACE: full
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
@@ -329,7 +329,7 @@ jobs:
       RUST_BACKTRACE: full
       RUSTV: ${{ matrix.rust }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Rust Stable
         uses: dtolnay/rust-toolchain@stable
       - name: Install NASM
@@ -381,7 +381,7 @@ jobs:
           ]
         run-mode: [local, local-k8]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Download artifact - fluvio
         uses: actions/download-artifact@v8
         with:
@@ -509,7 +509,7 @@ jobs:
         rust: [stable]
     steps:
       # Needed for k8-util/docker/build.sh
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # Download artifacts
       - name: Download fluvio-run
@@ -558,7 +558,7 @@ jobs:
         k8: [k3d]
         spu: [1,2]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       # Download artifacts
       - name: Download artifact - fluvio
         uses: actions/download-artifact@v8
@@ -673,7 +673,7 @@ jobs:
         rust-target: [x86_64-unknown-linux-musl]
         run: [r1]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup K3d
         run: |
           curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} bash
@@ -739,7 +739,7 @@ jobs:
         rust-target: [x86_64-unknown-linux-musl]
         run: [r1]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       # Download artifacts
       - name: Download artifact - fluvio
         uses: actions/download-artifact@v8
@@ -790,7 +790,7 @@ jobs:
         rust-target: [x86_64-unknown-linux-musl]
         run: [r1]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       # Download artifacts
       - name: Download artifact - fluvio
         uses: actions/download-artifact@v8
@@ -849,7 +849,7 @@ jobs:
         test: [fluvio,smdk,cdk]
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
       - name: Setup BATS
@@ -981,7 +981,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup BATS
         uses: mig4/setup-bats@v1
         with:
@@ -1006,7 +1006,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_primary_binaries
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup BATS
         uses: mig4/setup-bats@v1
         with:
@@ -1055,7 +1055,7 @@ jobs:
       matrix:
         run-mode: [local, local-k8]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup BATS
         uses: mig4/setup-bats@v1
         with:
@@ -1120,7 +1120,7 @@ jobs:
         os: [ubuntu-latest]
         rust-target: [x86_64-unknown-linux-musl]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup BATS
         uses: mig4/setup-bats@v1
         with:
@@ -1227,7 +1227,7 @@ jobs:
         os: [ubuntu-latest]
         rust-target: [x86_64-unknown-linux-musl]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup BATS
         uses: mig4/setup-bats@v1
         with:
@@ -1294,7 +1294,7 @@ jobs:
         run-mode: [local, local-k8]
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # Download Artifacts from Development Build (This Commit)
       - name: Download artifact - fluvio
