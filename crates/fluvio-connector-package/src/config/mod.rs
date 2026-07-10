@@ -500,7 +500,7 @@ pub struct ConsumerOffsetConfig {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub start: Option<OffsetConfig>,
     pub strategy: OffsetStrategyConfig,
-    #[serde(skip_serializing_if = "Option::is_none", default)]
+    #[serde(with = "humantime_serde", skip_serializing_if = "Option::is_none", default)]
     pub flush_period: Option<Duration>,
 }
 
@@ -1424,7 +1424,7 @@ mod tests {
         //then
         assert_eq!(
             config_ser,
-            "start:\n  absolute: 10\nstrategy: manual\nflush-period:\n  secs: 60\n  nanos: 0\n"
+            "start:\n  absolute: 10\nstrategy: manual\nflush-period: 1m\n"
         );
     }
 
@@ -1437,9 +1437,7 @@ mod tests {
             start:
               absolute: 11
             strategy: auto
-            flush-period:
-              secs: 160
-              nanos: 0
+            flush-period: 2m 40s
         "#,
         )
         .expect("config");
