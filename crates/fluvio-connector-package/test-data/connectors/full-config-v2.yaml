@@ -36,9 +36,7 @@ meta:
       start:
         absolute: 100
       strategy: auto
-      flush-period:
-        secs: 160
-        nanos: 0
+      flush-period: 2m 40s
   secrets:
     - name: secret1
 transforms:
