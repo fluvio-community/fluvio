@@ -844,6 +844,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "cargo_toml"
+version = "0.22.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "374b7c592d9c00c1f4972ea58390ac6b18cbb6ab79011f3bdc90a0b82ca06b77"
+dependencies = [
+ "serde",
+ "toml 0.9.6",
+]
+
+[[package]]
 name = "cassowary"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2131,7 +2141,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "cargo_toml",
+ "cargo_toml 0.22.3",
  "chrono",
  "fluvio-hub-protocol",
  "hex",
@@ -2587,7 +2597,7 @@ dependencies = [
 name = "fluvio-hub-protocol"
 version = "0.0.0"
 dependencies = [
- "cargo_toml",
+ "cargo_toml 0.22.3",
  "dirs 6.0.0",
  "fluvio-controlplane-metadata",
  "fluvio-types",
@@ -4555,7 +4565,7 @@ checksum = "656c8e7ffdbc0056353f44fc690873cf8040c67b9317f392e99bbbf9fd48050f"
 dependencies = [
  "anyhow",
  "byte-unit",
- "cargo_toml",
+ "cargo_toml 0.21.0",
  "chrono",
  "chrono-humanize",
  "crates_io_api",
