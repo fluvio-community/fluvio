@@ -116,13 +116,6 @@ Fluvio documentation will provide additional context on how to use the Fluvio cl
 - [Fluvio CLI docs home](https://www.fluvio.io/docs/fluvio/cli/overview)
 - [Fluvio Architecture](https://www.fluvio.io/docs/fluvio/concepts/architecture/overview)
 
-#### Check Stateful DataFlow Documentation
-Stateful DataFlow designed to handle complex data processing workflows, allowing for customization and scalability through various programming languages and system primitives.
-
-- [SDF quickstart](https://www.fluvio.io/sdf/quickstart/)
-- [SDF Architecture](https://www.fluvio.io/sdf/concepts/architecture)
-- [SDF Examples](https://github.com/infinyon/stateful-dataflows-examples/)
-
 #### Learn how to build custom connectors
 Fluvio can connect to practically any system that you can think of.
 - For first party systems, fluvio clients can integrate with the edge system or application to source data.
