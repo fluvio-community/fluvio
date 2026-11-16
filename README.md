@@ -155,6 +155,10 @@ Fluvio applies wasm based stream processing and data transformations. We call th
 - [Java API docs](https://github.com/infinyon/fluvio-client-java)
 - [Elixir API docs](https://github.com/viniarck/fluvio-ex)
 
+## One-Click Deploy
+
+[![Deploy on RepoCloud](https://d16t0pc4846x52.cloudfront.net/deploylobe.svg)](https://repocloud.io/details/Fluvio/)
+
 ## Contributing
 
 If you'd like to contribute to the project, please read our
